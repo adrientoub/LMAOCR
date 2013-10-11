@@ -1,35 +1,48 @@
-(* Convertit degré -> radian *)
+(* Convert degree to  radian *)
 let degreToRadian ang = 
   ang /. 180. *. 3.1415965359
 
-(* Donne la position de x dans l'image source (l'image telle qu'elle était avant d'etre scannée pas droit)*)
-(* x,y : coordonnés dans l'image scannée, ang : angle dont l'image est roté(du verbe francais rotationner sisi), cx,cy : centre de l'image *) 
+(* Get dimensions (width, heigth) of an image *)
+let get_dims img =
+  ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
+
+(* Get the initial postion of the (x,y) pixel in the source image, using -ang in a rotation matrix *)
 let initX x y ang cx cy =
   cx + truncate((float_of_int(x - cx)) *. cos(ang) -. (float_of_int(y - cy)) *. sin(ang))
 
-(* Donne la position de y dans l'image source *)
-(* x,y : coordonnés dans l'image scannée, ang : angle dont l'image est roté, cx,cy : centre de l'image *) 
+(* Get the initial postion of the (x,y) pixel in the source image, using -ang in a rotation matrix *) 
 let initY x y ang cx cy =
- cy + truncate((float_of_int(x - cx)) *. (sin(ang)) +. (float_of_int(y - cy)) *. cos(ang))
+  cy + truncate((float_of_int(x - cx)) *. (sin(ang)) +. (float_of_int(y - cy)) *. cos(ang))
 
-(* Test si un pixel est bien dans l'image *) 
-let isInBound x y width height =
-	(x >= 0) && (y >= 0) && (x < width-1) && (y < height-1)
+(* Is the pixel (x,y) in bound ? *) 
+let isInBound x y img =
+  let (w,h) = get_dims img in 
+    (x >= 0) && (y >= 0) && (x < w-1) && (y < h-1)
+
+(* Passe une image en blanc (provisoire) *)
+let toWhite img = 
+  let (w,h) = get_dims img in
+
+  for i = 0 to w - 1 do
+    for j = 0 to h - 1 do
+      Sdlvideo.put_pixel_color i j (255,255,255)
+    done
+  done
+
   
-(* img = image source du scanner, dst = image de destination, version pas optimisé car la version opti need une image deja blanche de depart *)
-let rotate img dst angDegre =
-  let w = (Sdlvideo.surface_info img).Sdlvideo.w
-  and h = (Sdlvideo.surface_info img).Sdlvideo.h
+(* try to figure out where each pixel of the scanned image were in the original image (the image before scanning) *)
+let rotate img angDegre =
+  let (w,h) = get_dims img
+  and dst = toWhite(Sdlvideo.create_RGB_surface_format img [] w h) 
   and ang = degreToRadian angDegre  in
   
   for i = 0 to w-1 do
-    for j = 0 to h-1 do     
-      let x = initX i j ang ((w-1)/2) ((h-1)/2)
-      and y = initY i j ang ((w-1)/2) ((h-1)/2)   in	
-        if isInBound x y w h then
-	  if Sdlvideo.get_pixel_color img i j = (0,0,0) then
-	      Sdlvideo.put_pixel_color dst x y (0,0,0)
-	  else 
-               Sdlvideo.put_pixel_color dst x y (255,255,255)
-    done
-  done
+    for j = 0 to h-1 do  
+      if Sdlvideo.get_pixel_color img i j = (0,0,0) then
+	let x = initX i j ang ((w-1)/2) ((h-1)/2)
+	and y = initY i j ang ((w-1)/2) ((h-1)/2)   in	
+
+        if isInBound x y img then	  
+	  Sdlvideo.put_pixel_color dst x y (0,0,0)
+    done;
+  done;
