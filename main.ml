@@ -60,13 +60,26 @@ let image2bnw src dst =
     done 
   done
 
+let showHelp () = 
+  Printf.printf "Pour lancer l'ocr utilisez les paramètres suivants : \n
+--help : afficher l'aide
+./lmaocr [nom du fichier] : lancer l'ocr avec l'image en paramètre
+./lmaocr [nom du fichier] [angle] : lancer l'ocr avec l'angle défini en paramètre\n";
+  exit 0
 
 (* main *)
 let main () =
   begin
     (* Nous voulons en argument le nom du fichier *)
-    if Array.length (Sys.argv) < 2 then
-      failwith "Il manque le nom du fichier!";
+    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
+      showHelp ();
+	
+    (* détection de l'angle en ligne de commande *)
+    let angle = 
+    if Array.length (Sys.argv) = 3 then 
+      float_of_string (Sys.argv.(2))
+    else 
+      5. in
     (* Initialisation de SDL *)
     sdl_init ();
     (* Chargement d'une image *)
@@ -77,7 +90,7 @@ let main () =
     image2bnw img bnwImage;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
-    Rotate.rotate bnwImage finalImage (5.);
+    Rotate.rotate bnwImage finalImage angle;
     (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     (* on affiche l'image *)
