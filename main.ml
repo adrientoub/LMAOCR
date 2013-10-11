@@ -64,8 +64,18 @@ let showHelp () =
   Printf.printf "Pour lancer l'ocr utilisez les paramètres suivants : \n
 --help : afficher l'aide
 ./lmaocr [nom du fichier] : lancer l'ocr avec l'image en paramètre
-./lmaocr [nom du fichier] [angle] : lancer l'ocr avec l'angle défini en paramètre\n";
+./lmaocr [nom du fichier] [angle] : lancer l'ocr avec l'angle défini en paramètre
+./lmaocr [nom du fichier] [-o [sauvegarde]] : sauvegarde le rendu dans l'image sauvegarde\n";
   exit 0
+
+let saveImage finalImage = 
+  let length = Array.length (Sys.argv) in
+  for i = 3 to length-1 do
+    if (compare Sys.argv.(i) "-o") = 0 then 
+      if (length >= i+1) then 
+	  Sdlvideo.save_BMP finalImage Sys.argv.(i+1);
+ done
+
 
 (* main *)
 let main () =
@@ -76,7 +86,7 @@ let main () =
 	
     (* détection de l'angle en ligne de commande *)
     let angle = 
-    if Array.length (Sys.argv) = 3 then 
+    if Array.length (Sys.argv) >= 3 then 
       float_of_string (Sys.argv.(2))
     else 
       5. in
@@ -95,6 +105,7 @@ let main () =
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     (* on affiche l'image *)
     show finalImage display;
+    saveImage finalImage;
       (* on attend une touche *)
       wait_key ();
       (* on quitte *)
