@@ -5,7 +5,7 @@ OCAMLFLAGS= -I +sdl -I +site-lib/sdl
 OCAMLLD= bigarray.cmxa sdl.cmxa sdlloader.cmxa
  
 tpsdl: main.ml
-	${OCAML} ${OCAMLFLAGS} ${OCAMLLD} -o lmaocr main.ml
+	${OCAML} ${OCAMLFLAGS} ${OCAMLLD} -o lmaocr rotate.ml main.ml 
  
 clean::
 	rm -f *~ *.o *.cm? lmaocr
