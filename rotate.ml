@@ -11,6 +11,10 @@ let initX x y ang cx cy =
 (* x,y : coordonnés dans l'image scannée, ang : angle dont l'image est roté, cx,cy : centre de l'image *) 
 let initY x y ang cx cy =
  cy + truncate((float_of_int(x - cx)) *. (sin(ang)) +. (float_of_int(y - cy)) *. cos(ang))
+
+(* Test si un pixel est bien dans l'image *) 
+let isInBound x y width height =
+	(x >= 0) && (y >= 0) && (x < width-1) && (y < height-1)
   
 (* img = image source du scanner, dst = image de destination, version pas optimisé car la version opti need une image deja blanche de depart *)
 let rotate img dst angDegre =
@@ -20,9 +24,9 @@ let rotate img dst angDegre =
   
   for i = 0 to w-1 do
     for j = 0 to h-1 do     
-      let x = initX i j ang (w/2) (h/2)
-      and y = initY i j ang (w/2) (h/2)   in	
-        if (x >= 0) && (y >= 0) && (x < w-1) && (y < h-1) then
+      let x = initX i j ang ((w-1)/2) ((h-1)/2)
+      and y = initY i j ang ((w-1)/2) ((h-1)/2)   in	
+        if isInBound x y w h then
 	  if Sdlvideo.get_pixel_color img i j = (0,0,0) then
 	      Sdlvideo.put_pixel_color dst x y (0,0,0)
 	  else 
