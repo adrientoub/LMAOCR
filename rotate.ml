@@ -20,7 +20,7 @@ let isInBound x y width height =
 let rotate img dst angDegre =
   let w = (Sdlvideo.surface_info img).Sdlvideo.w
   and h = (Sdlvideo.surface_info img).Sdlvideo.h
-  and ang = degreToRadian anDegre  in
+  and ang = degreToRadian angDegre  in
   
   for i = 0 to w-1 do
     for j = 0 to h-1 do     
