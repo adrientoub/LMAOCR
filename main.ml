@@ -63,11 +63,15 @@ let main () =
     let img = Sdlloader.load_image Sys.argv.(1) in
     (* On récupère les dimensions *)
     let (w,h) = get_dims img in
-    let bnwImage = Sdlvideo.create_RGB_surface_format img [] w h in 
-    Binarization.binarization img bnwImage;
+    let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
+    Binarization.image2grey img greyImage;(*
+    let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
+    Filters.applyScrubFilter greyImage filteredImage;*)
+    let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
+    Binarization.image2bnw greyImage finalImage;(*
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
-    Rotate.rotate bnwImage finalImage angle;
+    Rotate.rotate bnwImage finalImage angle;*)
     (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     (* on affiche l'image *)

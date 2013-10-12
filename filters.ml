@@ -7,17 +7,30 @@ let isInBound img x y =
   let (w,h) = get_dims img in 
     (x >= 0) && (y >= 0) && (x < w-1) && (y < h-1)
 
-
-(* ------------ Median Filter --------------- *)
+(*  ------------ Image to grey --------------- *)
 
 (* Calculate the luminosity of a pixel *)
 let level (r,g,b) =
   let rf = float_of_int r and gf = float_of_int g and bf = float_of_int b
   in (0.3*.rf +. 0.59*.gf +. 0.11*.bf)/.255.
-  
-let color2grey (r,g,b) = 
+
+(* Get the grey color of the pixel using level *)  
+let toGrey (r,g,b) = 
   let gris = int_of_float (level (r,g,b) *. 255.)
   in (gris,gris,gris)
+
+(* Conversion of the image to grayscale *)
+let imageToGrey img dst =
+  let (w,h) = get_dims img in
+  for i = 0 to w-1 do
+    for j = 0 to h-1 do
+      let greyColor = toGrey(Sdlvideo.get_pixel_color img i j) in
+      Sdlvideo.put_pixel_color dst i j greyColor
+    done
+  done
+
+
+(* ------------ Median Filter --------------- *)
 
 (* insert an elt in a sorted list *)
 let rec addSort x list = 
@@ -31,7 +44,7 @@ let getMedianList list =
    if length mod 2 = 1 then
      List.nth list (length/2 + 1)
    else 
-     List.nth list length/2  
+     List.nth list (length/2);;
 
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
 let square3x3ToList img x y = 
@@ -41,8 +54,9 @@ let square3x3ToList img x y =
     for j = y-1 to y+1 do
       if isInBound img x y then
 	listPixel := addSort (level (Sdlvideo.get_pixel_color img i j)) !listPixel;
-    done
-  done
+    done;
+  done;
+!listPixel
   end 
     
 (* dst must be completely white *)
@@ -59,14 +73,42 @@ let filtreMedian img dst =
 
 (* *)
 let scrubMatrixMult img x y = 
-  let (rf, gf, bf) = ref (0,0,0) in
+  let rf = ref 0  and gf = ref 0  and bf = ref 0 in
   for i = x-1 to x+1 do
     for j = y-1 to y+1 do
-      if isInBound img i j then
+      if isInBound img i j then		
         let (r,g,b) = Sdlvideo.get_pixel_color img i j in
-        if (i = x) && (j = y) then
-	  (rf, gf, bf) := (!rf + 5*r,!gf + 5*g,!bf + 5*b)  
-        else 
-          (rf, gf, bf) := (!rf + r,!gf + g,!bf + b)
+	  match (i,j) with
+	    (i,j) when (i,j) = (x,y) ->   begin
+	                                  rf := !rf + 5*r;
+	                                  gf := !gf + 5*g;
+	                                  bf := !bf + 5*b
+	                                  end
+
+	    |(_,_) ->                     begin
+	                                  rf := !rf + r;
+	                                  gf := !gf + g;
+	                                  bf := !bf + b;
+	                                  end
+
+        (*if (i = x) && (j = y) then
+	  rf := !rf + 5*r;
+	  gf := !gf + 5*g;
+	  bf := !bf + 5*b;
+        else 	
+          rf := !rf + r;
+	  gf := !gf + g;
+	  bf := !bf + b;*)         
+    done;
+  done;   
+  (!rf,!gf,!bf)
+ 
+let applyScrubFilter img dst = 
+  let (w,h) = get_dims img in
+  for i = 0 to w-1 do
+    for j = 0 to h-1 do
+      let color = scrubMatrixMult img i j in
+      Sdlvideo.put_pixel_color dst i j color
     done
   done
+
