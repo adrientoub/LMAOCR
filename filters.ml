@@ -20,13 +20,54 @@ let borne x =
 
 (* ---------------- Matrix ------------------- *)
 
+(* type color RGB (r,g,b) *)
+type color = 
+{
+  color : (int*int*int);
+}
+
+(* type matrix composed by a 2D array of color, w = width, h = height *)
 type matrix = 
   {
     w : int;
-    h : int;
-    
+    h : int;    
+    matrix : color array array;
   }
-    
+
+let initMatrix width height =
+  let init_color = { color = (0,0,0); } in
+  let new_matrix =
+    {
+       w = width;
+       h = height;       
+       matrix = Array.create_matrix width height init_color;
+    }
+  in new_matrix
+
+(* Is x y in matrix's bounds ? *)
+let isInMatrix matrix x y =
+  (x >= 0) && (x < matrix.w) && (y >= 0) && (y < matrix.h)
+
+(* Return the tab[x][y] color *) 
+let getColorInMatrix matrix x y =
+  if isInMatrix matrix x y then
+    matrix.matrix.(x).(y)
+  else
+    failwith "Out of matrix's bounds!"
+
+(* Put the img in a matrix *)
+let imgToMatrix img =  
+  begin
+  let (w,h) = get_dims img in
+  let matrix = initMatrix w h in     
+    for i = 0 to w-1 do
+      for j = 0 to h-1 do
+	matrix.(i).(j) <- Sdlvideo.get_pixel_color img i j
+      done;
+    done; 
+  matrix;
+  end
+  
 
 (* ------------- Image to grey --------------- *)
 
