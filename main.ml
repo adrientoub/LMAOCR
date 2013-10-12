@@ -64,7 +64,7 @@ let main () =
     (* On récupère les dimensions *)
     let (w,h) = get_dims img in
     let bnwImage = Sdlvideo.create_RGB_surface_format img [] w h in 
-    Binarization.image2bnw img bnwImage;
+    Binarization.binarization img bnwImage;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
     Rotate.rotate bnwImage finalImage angle;

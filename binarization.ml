@@ -13,8 +13,8 @@ let color2grey (r, g, b) =
 (* transforme une image en niveau de gris *)
 let image2grey src dst =
   let (w, h) = Rotate.get_dims src in 
-  for i = 0 to w do
-    for j = 0 to h do 
+  for i = 0 to w-1 do
+    for j = 0 to h-1 do 
       let color = Sdlvideo.get_pixel_color src i j in 
       Sdlvideo.put_pixel_color dst i j (color2grey color)
     done 
@@ -32,3 +32,33 @@ let image2bnw src dst =
       Sdlvideo.put_pixel_color dst i j (newColor, newColor, newColor)
     done 
   done
+
+let binarization src dst = 
+  let (w,h) = Rotate.get_dims src in
+  let tab = Array.init 256 (function n -> 0) in
+  let nbVal = ref 0 and i = ref 0 in 
+  image2grey src src;
+  for x=0 to w-1 do
+    for y=0 to h-1 do
+      let (color,_,_) = Sdlvideo.get_pixel_color src x y in 
+      tab.(color) <- tab.(color) + 1
+    done;
+  done;
+    while (!i <= 255 && (!nbVal <= (w*h/2))) do
+      nbVal := tab.(!i) + !nbVal;
+      incr i;
+    done;
+let seuil = !i in
+for j=0 to w do
+  for k=0 to h do
+    let (color,_,_) = Sdlvideo.get_pixel_color src j k in
+    if color <= seuil then
+      Sdlvideo.put_pixel_color dst j k (0,0,0)
+    else 
+      Sdlvideo.put_pixel_color dst j k (255,255,255)
+  done
+done
+
+
+      
+  

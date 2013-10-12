@@ -35,22 +35,22 @@ let getMedianList list =
 
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
 let square3x3ToList img x y = 
+  begin
+  let listPixel = ref [] in
   for i = x-1 to x+1 do
     for j = y-1 to y+1 do
-      let listPixel = [] in 
-      if isInbound img x y then
-	      begin
-	      addSort (level(Sdlvideo.get_pixel_color img i j)) listPixel;
-	      end 
+      if isInBound img x y then
+	listPixel := addSort (level (Sdlvideo.get_pixel_color img i j)) !listPixel;
     done
   done
-
+  end 
+    
 (* dst must be completely white *)
 let filtreMedian img dst =
   let (w,h) = get_dims img in  
   for i = 0 to w-1 do
     for j = 0 to h-1 do
-      let color = int_of_float(getMedianList(square3x3ToList i j) *. 255) in
+      let color = int_of_float(getMedianList(square3x3ToList img i j) *. 255.) in
       Sdlvideo.put_pixel_color dst i j (color,color,color)
     done 
   done
