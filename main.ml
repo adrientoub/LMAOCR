@@ -64,10 +64,9 @@ let main () =
     (* On récupère les dimensions *)
     let (w,h) = get_dims img in(*
     let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
-    Binarization.image2grey img
+    Binarization.image2grey img greyImage
     let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Filters.applyScrubFilter greyImage filteredImage;*)
-    Printf.printf "test";
     let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Binarization.binarization img binarizedImage;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in

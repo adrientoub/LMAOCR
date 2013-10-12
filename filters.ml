@@ -75,11 +75,11 @@ let imgToMatrix img =
 let matrixToImg matrix = 
   begin
   let w = matrix.w and h = matrix.h
-  and bpp = 8 and rmask = 255 and gmask = 255 and bmask = 255 = amask = 255 in
+  and bpp = 8 and rmask = Int32.of_int(255) and gmask = Int32.of_int(255) and bmask = Int32.of_int(255) and amask = Int32.of_int(255) in
   let img = Sdlvideo.create_RGB_surface [] w h bpp rmask gmask bmask amask in
   for i = 0 to w-1 do
     for j = 0 to h-1 do
-      Sdlvideo.put_pixel_color = matrix.matrix.(i).(j);
+      Sdlvideo.put_pixel_color img i j matrix.matrix.(i).(j);
     done;
   done;
   img;
