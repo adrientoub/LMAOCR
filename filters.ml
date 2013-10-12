@@ -74,8 +74,9 @@ let square3x3ToList img x y =
     for j = y-1 to y+1 do
       if isInBound img x y then
 	listPixel := addSort (level (Sdlvideo.get_pixel_color img i j)) !listPixel;
-    done
-  done
+    done;
+  done;
+  !listPixel
   end 
     
 (* Apply median filter *)
