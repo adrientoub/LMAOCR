@@ -62,13 +62,14 @@ let main () =
     (* Chargement d'une image *)
     let img = Sdlloader.load_image Sys.argv.(1) in
     (* On récupère les dimensions *)
-    let (w,h) = get_dims img in
+    let (w,h) = get_dims img in(*
     let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
-    Binarization.image2grey img greyImage;(*
+    Binarization.image2grey img
     let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Filters.applyScrubFilter greyImage filteredImage;*)
+    Printf.printf "test";
     let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Binarization.image2bnw greyImage binarizedImage;
+    Binarization.binarization img binarizedImage;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
     Rotate.rotate binarizedImage finalImage angle;
