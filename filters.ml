@@ -20,27 +20,20 @@ let borne x =
 
 (* ---------------- Matrix ------------------- *)
 
-(* type color RGB (r,g,b) *)
-type color = 
-{
-  color : (int*int*int);
-}
-
 (* type matrix composed by a 2D array of color, w = width, h = height *)
 type matrix = 
   {
     w : int;
-    h : int;    
-    matrix : color array array;
+    h : int;
+    matrix : (int*int*int) array array;
   }
 
 let initMatrix width height =
-  let init_color = { color = (0,0,0); } in
   let new_matrix =
     {
        w = width;
        h = height;       
-       matrix = Array.create_matrix width height init_color;
+       matrix = Array.create_matrix width height (0,0,0);
     }
   in new_matrix
 
@@ -62,7 +55,7 @@ let imgToMatrix img =
   let matrix = initMatrix w h in     
     for i = 0 to w-1 do
       for j = 0 to h-1 do
-	matrix.(i).(j) <- Sdlvideo.get_pixel_color img i j
+	matrix.matrix.(i).(j) <- Sdlvideo.get_pixel_color img i j
       done;
     done; 
   matrix;
