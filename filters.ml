@@ -10,7 +10,7 @@ let isInBound img x y =
     (x >= 0) && (y >= 0) && (x < w-1) && (y < h-1)
 
 (* upper bound et lower bound x by 255 and 0 *)
-let born x =
+let borne x =
   if x < 0 then
     0
   else if x > 255 then

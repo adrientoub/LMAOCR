@@ -67,11 +67,11 @@ let main () =
     Binarization.image2grey img greyImage;(*
     let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Filters.applyScrubFilter greyImage filteredImage;*)
-    let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Binarization.image2bnw greyImage finalImage;(*
+    let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
+    Binarization.image2bnw greyImage binarizedImage;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
-    Rotate.rotate bnwImage finalImage angle;*)
+    Rotate.rotate binarizedImage finalImage angle;
     (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     (* on affiche l'image *)
