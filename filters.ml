@@ -132,21 +132,19 @@ let getMedianArray tab =
     else
       tab.((length/2))
 
-(* BUGGED *)
+(* BUGGED? *)
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
-(*
 let square3x3ToList img x y = 
   begin
   let listPixel = ref [] in
   for i = x-1 to x+1 do
     for j = y-1 to y+1 do
-      if isInBound img x y then
-	listPixel := addSort (level (Sdlvideo.get_pixel_color img i j)) !listPixel;
+      (* if isInBound img x y then *)
+	listPixel := (1.)::(!listPixel);
     done;
   done;
-  !listPixel
+  List.sort (!listPixel)
   end 
-*)
 
 (* Put level of pixels around center pixel in a array (in a sorted way) *)
 let square3x3ToArray img x y = 
