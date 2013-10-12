@@ -36,20 +36,15 @@ let image2bnw src dst =
 let binarization src dst = 
   let (w,h) = Rotate.get_dims src in
   let greyImage = Sdlvideo.create_RGB_surface_format src [] w h in
-  let tab = Array.init 256 (function n -> 0) in
-  let nbVal = ref 0 and i = ref 0 in
+  let v = ref 0 in
   image2grey src greyImage;
   for x=0 to w-1 do
     for y=0 to h-1 do
       let (color,_,_) = Sdlvideo.get_pixel_color greyImage x y in 
-      tab.(color) <- tab.(color) + 1
+      v := !v + color;
     done;
   done;
-    while (!i <= 255 && (!nbVal <= (w*h/2))) do
-      nbVal := tab.(!i) + !nbVal;
-      incr i;
-    done;
-let seuil = !i in
+let seuil = int_of_float (((float_of_int !v)) /. (float_of_int (w*h))) in
 for j=0 to w-1 do
   for k=0 to h-1 do
     let (color,_,_) = Sdlvideo.get_pixel_color greyImage j k in
