@@ -140,11 +140,14 @@ let square3x3ToList img x y =
   for i = x-1 to x+1 do
     for j = y-1 to y+1 do
       (* if isInBound img x y then *)
-	listPixel := (1.)::(!listPixel);
+	listPixel := (1.)::(!listPixel)
     done;
   done;
-  List.sort (!listPixel)
-  end 
+  List.sort (function x -> function y -> match (x,y) with
+      (x,y) when x < y -> 1
+    | (x,y) when x = y -> 0
+    | _ -> -1) (!listPixel)
+  end
 
 (* Put level of pixels around center pixel in a array (in a sorted way) *)
 let square3x3ToArray img x y = 
@@ -156,7 +159,7 @@ let square3x3ToArray img x y =
 	   cpt := !cpt + 1;
        done;
      done;
-    let tabPixel = Array.make !cpt 0  (*Array.Init !cpt (function n -> 0.) *)
+    let tabPixel = Array.make !cpt 0.  (*Array.Init !cpt (function n -> 0.) *)
     and cpt2 = ref 0 in  
     for i = x-1 to x+1 do
       for j = y-1 to y+1 do
@@ -165,7 +168,11 @@ let square3x3ToArray img x y =
 	   cpt2 := !cpt2 + 1;
        done;
      done;
-    Array.sort tabPixel;
+    Array.sort (function x -> function y -> match (x,y) with
+      (x,y) when x < y -> 1
+    | (x,y) when x = y -> 0
+    | _ -> -1) tabPixel;
+    tabPixel;
   end
 
     
