@@ -1,3 +1,5 @@
+(*  ------------ Mandatory fonctions --------------- *)
+
 (* Get image's dimensions *)
 let get_dims img =
   ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
@@ -7,7 +9,26 @@ let isInBound img x y =
   let (w,h) = get_dims img in 
     (x >= 0) && (y >= 0) && (x < w-1) && (y < h-1)
 
-(*  ------------ Image to grey --------------- *)
+(* upper bound et lower bound x by 255 and 0 *)
+let born x =
+  if x < 0 then
+    0
+  else if x > 255 then
+    255
+  else 
+    x
+
+(* ---------------- Matrix ------------------- *)
+
+type matrix = 
+  {
+    w : int;
+    h : int;
+    
+  }
+    
+
+(* ------------- Image to grey --------------- *)
 
 (* Calculate the luminosity of a pixel *)
 let level (r,g,b) =
@@ -29,7 +50,6 @@ let imageToGrey img dst =
     done
   done
 
-
 (* ------------ Median Filter --------------- *)
 
 (* insert an elt in a sorted list *)
@@ -44,7 +64,7 @@ let getMedianList list =
    if length mod 2 = 1 then
      List.nth list (length/2 + 1)
    else 
-     List.nth list (length/2);;
+     List.nth list (length/2)  
 
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
 let square3x3ToList img x y = 
@@ -54,13 +74,12 @@ let square3x3ToList img x y =
     for j = y-1 to y+1 do
       if isInBound img x y then
 	listPixel := addSort (level (Sdlvideo.get_pixel_color img i j)) !listPixel;
-    done;
-  done;
-!listPixel
+    done
+  done
   end 
     
-(* dst must be completely white *)
-let filtreMedian img dst =
+(* Apply median filter *)
+let applyFilterMedian img dst =
   let (w,h) = get_dims img in  
   for i = 0 to w-1 do
     for j = 0 to h-1 do
@@ -100,9 +119,10 @@ let scrubMatrixMult img x y =
 	  gf := !gf + g;
 	  bf := !bf + b;*)         
     done;
-  done;   
-  (!rf,!gf,!bf)
- 
+  done;     
+   (borne(!rf),borne(!gf),borne(!bf))
+
+(* *)
 let applyScrubFilter img dst = 
   let (w,h) = get_dims img in
   for i = 0 to w-1 do
@@ -111,4 +131,5 @@ let applyScrubFilter img dst =
       Sdlvideo.put_pixel_color dst i j color
     done
   done
+
 
