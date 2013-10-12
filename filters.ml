@@ -181,8 +181,11 @@ let applyFilterMedian img dst =
   let (w,h) = get_dims img in  
   for i = 0 to w-1 do
     for j = 0 to h-1 do
-      let color = int_of_float(getMedianArray(square3x3ToArray img i j) *. 255.) in
-      Sdlvideo.put_pixel_color dst i j (color,color,color)
+      if isInBound img i j then 
+	begin
+	  let color = int_of_float(getMedianArray(square3x3ToArray img i j) *. 255.) in
+	  Sdlvideo.put_pixel_color dst i j (color,color,color)
+	end 
     done 
   done
   
