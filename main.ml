@@ -56,7 +56,7 @@ let main () =
     if Array.length (Sys.argv) >= 3 then 
       float_of_string (Sys.argv.(2))
     else 
-      5. in
+      0. in
     (* Initialisation de SDL *)
     sdl_init ();
     (* Chargement d'une image *)
