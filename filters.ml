@@ -47,6 +47,16 @@ let getColorInMatrix matrix x y =
     matrix.matrix.(x).(y)
   else
     failwith "Out of matrix's bounds!"
+    
+(* Set the tab[x][y] color *)
+let setColorMatrix matrix x y color =
+  if isInMatrix matrix x y then
+    begin
+    matrix.matrix.(x).(y) <- color;
+    matrix;
+    end  
+  else
+    failwith "Out of matrix's bounds!"    
 
 (* Put the img in a matrix *)
 let imgToMatrix img =  
