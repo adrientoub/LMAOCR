@@ -110,6 +110,8 @@ let imageToGrey img dst =
 
 (* ------------ Median Filter --------------- *)
 
+(* ------------ Median Filter --------------- *)
+
 (* insert an elt in a sorted list *)
 let rec addSort x list = 
   match list with
@@ -132,7 +134,13 @@ let getMedianArray tab =
     else
       tab.((length/2))
 
-(* BUGGED? *)
+(* Get the relaxed median value of an array *)
+let getRelaxedMedianArray cp tab =
+  if (cp > getMedianArray tab) && (cp < getMedianArray tab + 1) then
+    cp
+  else
+    getMedianArray tab
+
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
 let square3x3ToList img x y = 
   begin
@@ -174,7 +182,6 @@ let square3x3ToArray img x y =
     | _ -> -1) tabPixel;
     tabPixel;
   end
-
     
 (* Apply median filter *)
 let applyFilterMedian img dst =
@@ -186,6 +193,18 @@ let applyFilterMedian img dst =
 	  Sdlvideo.put_pixel_color dst i j (color,color,color)
     done 
   done
+
+(* Apply relaxed median filter *)
+let applyFilterMedian img dst =
+  let (w,h) = get_dims img in  
+  for i = 0 to w-1 do
+    for j = 0 to h-1 do
+      if isInBound img i j then 
+	  let color = int_of_float(getRelaxedMedianArray ((square3x3ToArray img i j) *. 255.)) (level (Sdlvideo.get_pixel_color img i j)) in
+	  Sdlvideo.put_pixel_color dst i j (color,color,color)
+    done 
+  done
+  
   
 (* ------------ "scrub?" ------------ *)
 
