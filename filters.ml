@@ -110,8 +110,6 @@ let imageToGrey img dst =
 
 (* ------------ Median Filter --------------- *)
 
-(* ------------ Median Filter --------------- *)
-
 (* insert an elt in a sorted list *)
 let rec addSort x list = 
   match list with
@@ -201,7 +199,7 @@ let applyFilterMedian img dst =
     for j = 0 to h-1 do
       if isInBound img i j then 
       	let squarePixel = square3x3ToArray img i j 
-      	and centerPixelLevel = level (Sdlvideo.get_pixel_color img i j in
+      	and centerPixelLevel = level Sdlvideo.get_pixel_color img i j in
       	let relaxedMedian = getRelaxedMedianArray squarePixel centerPixelLevel in 
 	let color = int_of_float(relaxedMedian) in
 	  Sdlvideo.put_pixel_color dst i j (color,color,color)
