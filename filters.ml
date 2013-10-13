@@ -187,13 +187,15 @@ let applyFilterMedian img dst =
   for i = 0 to w-1 do
     for j = 0 to h-1 do
       if isInBound img i j then 
-	  let color = int_of_float(getMedianArray(square3x3ToArray img i j) *. 255.) in
+      	let squarePixel = square3x3ToArray img i j in
+      	let median = getMedianArray squarePixel
+	let color = int_of_float(median *. 255.) in
 	  Sdlvideo.put_pixel_color dst i j (color,color,color)
     done 
   done
 
 (* Apply relaxed median filter *)
-let applyFilterMedian img dst =
+let applyRelaxedFilterMedian img dst =
   let (w,h) = get_dims img in  
   for i = 0 to w-1 do
     for j = 0 to h-1 do
@@ -201,7 +203,7 @@ let applyFilterMedian img dst =
       	let squarePixel = square3x3ToArray img i j 
       	and centerPixelLevel = level (Sdlvideo.get_pixel_color img i j) in
       	let relaxedMedian = getRelaxedMedianArray squarePixel centerPixelLevel in 
-	let color = int_of_float(relaxedMedian) in
+	let color = int_of_float(relaxedMedian *. 255.) in
 	  Sdlvideo.put_pixel_color dst i j (color,color,color)
     done 
   done
