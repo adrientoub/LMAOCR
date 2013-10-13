@@ -50,4 +50,37 @@ let rotate img dst angDegre =
     done
   done
   
+(* Do a weighted average of the source pixel with its neighbors, according to the percentage it overlaps them. *)
+let getInitColor img srcX srcY decX decY = 
+  let initColor = int_of_float (
+       (1. -. decX) *. (1. -. decY) *.(float_of_int (Sdlvideo.get_pixel_color img (truncate srcX) (truncate srcY)))
+    +. decX *. (1. -. decY) *. (float_of_int (Sdlvideo.get_pixel_color img (1 + truncate srcX) (truncate srcY)))
+    +. (1. -. decX) *. decY *. (float_of_int (Sdlvideo.get_pixel_color img (truncate srcX) (1 + truncate srcY)))
+    +. decX *. decY *. (float_of_int (Sdlvideo.get_pixel_color img (1 + truncate srcX) (1 + truncate srcY)))) in
+  if initColor > 127 then 255 
+  else 0
+  
+(* Weighted rotation *)
+let rotateWeighted img dst angDegre =
+  let ang = degreToRadian ang in
+  if ang = 0 then
+    let (w,h) = get_dims img in
+    let cosAng = cos(ang) and sinAng = sin(ang) in
+    for i = 0 to w-1 do
+      for j = 0 to h-1 do  
+	if Sdlvideo.get_pixel_color img i j = (0,0,0) then
+	  let srcX = initX i j cosAng sinAng ((w-1)/2) ((h-1)/2)
+	  and srcY = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in
+	  let decX = srcX - floor(srcX)
+	  and decY = srcY - floor(srcY) in	  
+          if isInBound img x y then	  
+	    Sdlvideo.put_pixel_color dst x y (getInitColor img srcX srcY decX decY) 
+      done
+    done
+  else
+     for i = 0 to w-1 do
+      for j = 0 to h-1 do  
+	Sdlvideo.put_pixel color dst i j (Sdlvideo.get_pixel_color img i j)
+      done
+     done
 
