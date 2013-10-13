@@ -32,27 +32,24 @@ let toWhite img =
   let (w,h) = get_dims img in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
-      Sdlvideo.put_pixel_color i j (255,255,255)
+      Sdlvideo.put_pixel_color img i j (255,255,255)
     done
   done
 
   
 (* try to figure out where each pixel of the scanned image were in the original image (the image before scanning) *)
-let rotate img angDegre =
+let rotate img dst angDegre =
   let (w,h) = get_dims img
-  and dst = toWhite(Sdlvideo.create_RGB_surface_format img [] w h) 
   and ang = degreToRadian angDegre  in
   let cosAng = cos(ang) and sinAng = sin(ang) in
-  
   for i = 0 to w-1 do
     for j = 0 to h-1 do  
       if Sdlvideo.get_pixel_color img i j = (0,0,0) then
 	let x = initX i j cosAng sinAng ((w-1)/2) ((h-1)/2)
-	and y = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in	
-
+	and y = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in
         if isInBound img x y then	  
 	  Sdlvideo.put_pixel_color dst x y (0,0,0)
-    done;
-  done;
+    done
+  done
   
 
