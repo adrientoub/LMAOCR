@@ -34,12 +34,12 @@ let image2bnw src dst =
   done
 
 let binarization src dst = 
-  let (w,h) = Rotate.get_dims src in
+  let (w,h) = Rotate.get_dims src in(*
   let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
-  Filters.applyFilterMedian src filteredImage;
+  Filters.applyFilterMedian src filteredImage;*)
   let greyImage = Sdlvideo.create_RGB_surface_format src [] w h in
   let v = ref 0 in
-  image2grey filteredImage greyImage;
+  image2grey src greyImage;
   for x=0 to w-1 do
     for y=0 to h-1 do
       let (color,_,_) = Sdlvideo.get_pixel_color greyImage x y in 
