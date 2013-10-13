@@ -8,17 +8,11 @@ let get_dims img =
 
 (* Get the initial postion of the (x,y) pixel in the source image, using -ang in a rotation matrix *)
 let initX x y cosAng sinAng cx cy =
-(*  cx + (x - cx) * truncate(floor(cosAng)) - (y - cy) * truncate(floor(sinAng))  *)
-(*  cx + (x - cx) * truncate(ceil(cosAng)) - (y - cy) * truncate(ceil(sinAng)) *)
-(*  cx + (x - cx) * truncate(cosAng) - (y - cy) * truncate(sinAng) *)
-  cx + truncate((float_of_int(x - cx)) *. cosAng -. (float_of_int(y - cy) *. sinAng))
+  float_of_int cx +. float_of_int(x - cx) *. cosAng -. float_of_int(y - cy) *. sinAng
 
 (* Get the initial postion of the (x,y) pixel in the source image, using -ang in a rotation matrix *) 
 let initY x y cosAng sinAng cx cy =
-(*  cy + (x - cx) * truncate(floor(sinAng)) + (y - cy) * truncate(floor(cosAng)) *)
-(*  cy + (x - cx) * truncate(ceil(sinAng)) + (y - cy) * truncate(ceil(cosAng)) *)
-(*  cy + (x - cx) * truncate(sinAng) + (y - cy) * truncate(cosAng) *)
-  cy + truncate((float_of_int(x - cx)) *. sinAng +. (float_of_int(y - cy) *. cosAng))
+  float_of_int cy +. float_of_int(x - cx) *. sinAng +. float_of_int(y - cy) *. cosAng
 
 (* Is the pixel (x,y) in bound ? *) 
 let isInBound img x y =
