@@ -69,7 +69,7 @@ let getMedianArrayGrey tab =
 (* Get the relaxed median value of an array of level *)
 let getRelaxedMedianArrayGrey tab cp =
   let median = getMedianArrayGrey tab in
-  if (cp > median -. 1.) && (cp < median +. 1.) then
+  if (cp > median) && (cp < median +. 1.) then
     cp
   else
     median
