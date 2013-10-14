@@ -8,17 +8,11 @@ let get_dims img =
 
 (* Get the initial postion of the (x,y) pixel in the source image, using -ang in a rotation matrix *)
 let initX x y cosAng sinAng cx cy =
-(*  cx + (x - cx) * truncate(floor(cosAng)) - (y - cy) * truncate(floor(sinAng))  *)
-(*  cx + (x - cx) * truncate(ceil(cosAng)) - (y - cy) * truncate(ceil(sinAng)) *)
-(*  cx + (x - cx) * truncate(cosAng) - (y - cy) * truncate(sinAng) *)
-  cx + truncate((float_of_int(x - cx)) *. cosAng -. (float_of_int(y - cy) *. sinAng))
+  float_of_int cx +. float_of_int(x - cx) *. cosAng -. float_of_int(y - cy) *. sinAng
 
 (* Get the initial postion of the (x,y) pixel in the source image, using -ang in a rotation matrix *) 
 let initY x y cosAng sinAng cx cy =
-(*  cy + (x - cx) * truncate(floor(sinAng)) + (y - cy) * truncate(floor(cosAng)) *)
-(*  cy + (x - cx) * truncate(ceil(sinAng)) + (y - cy) * truncate(ceil(cosAng)) *)
-(*  cy + (x - cx) * truncate(sinAng) + (y - cy) * truncate(cosAng) *)
-  cy + truncate((float_of_int(x - cx)) *. sinAng +. (float_of_int(y - cy) *. cosAng))
+  float_of_int cy +. float_of_int(x - cx) *. sinAng +. float_of_int(y - cy) *. cosAng
 
 (* Is the pixel (x,y) in bound ? *) 
 let isInBound img x y =
@@ -43,11 +37,49 @@ let rotate img dst angDegre =
   for i = 0 to w-1 do
     for j = 0 to h-1 do  
       if Sdlvideo.get_pixel_color img i j = (0,0,0) then
-	let x = initX i j cosAng sinAng ((w-1)/2) ((h-1)/2)
-	and y = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in
+	let x = int_of_float (initX i j cosAng sinAng ((w-1)/2) ((h-1)/2))
+	and y = int_of_float (initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)) in
         if isInBound img x y then	  
 	  Sdlvideo.put_pixel_color dst x y (0,0,0)
     done
   done
+
+let float_of_color (color, _, _) = 
+  float_of_int color
+
+(* Do a weighted average of the source pixel with its neighbors, according to the percentage it overlaps them. *)
+let getInitColor img srcX srcY decX decY = 
+  let initColor = int_of_float (
+       (1. -. decX) *. (1. -. decY) *.(float_of_color (Sdlvideo.get_pixel_color img (truncate srcX) (truncate srcY)))
+    +. decX *. (1. -. decY) *. (float_of_color (Sdlvideo.get_pixel_color img (1 + truncate srcX) (truncate srcY)))
+    +. (1. -. decX) *. decY *. (float_of_color (Sdlvideo.get_pixel_color img (truncate srcX) (1 + truncate srcY)))
+    +. decX *. decY *. (float_of_color (Sdlvideo.get_pixel_color img (1 + truncate srcX) (1 + truncate srcY)))) in
+  if initColor > 127 then 255 
+  else 0
   
+(* Weighted rotation *)
+let rotateWeighted img dst angDegre =
+  let ang = degreToRadian angDegre in
+  let (w,h) = get_dims img in
+  if ang <> 0. then
+    let cosAng = cos(ang) and sinAng = sin(ang) in
+    for i = 0 to w-1 do
+      for j = 0 to h-1 do  
+	if Sdlvideo.get_pixel_color img i j = (0,0,0) then
+	  let srcX = initX i j cosAng sinAng ((w-1)/2) ((h-1)/2)
+	  and srcY = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in
+	  let decX = srcX -. floor(srcX)
+	  and decY = srcY -. floor(srcY) in
+	  let x = int_of_float srcX and y = int_of_float srcY in
+	  let color = (getInitColor img srcX srcY decX decY) in
+          if isInBound img x y then	  
+	    Sdlvideo.put_pixel_color dst x y (color, color, color) 
+      done
+    done
+  else
+     for i = 0 to w-1 do
+      for j = 0 to h-1 do  
+	Sdlvideo.put_pixel_color dst i j (Sdlvideo.get_pixel_color img i j)
+      done
+     done
 
