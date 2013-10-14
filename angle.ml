@@ -69,27 +69,32 @@ let transformToPoints img =
     let (w, h) = get_dims img in
     let output = Sdlvideo.create_RGB_surface_format img [] w h and
 	fini = ref false and 
-	lastPixel = ref [] and pixelsNoirs = [] and
+	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0 in
     begin
       scanned := (Array.create_matrix w h false); (* Initialise le tableau de scan *)
 (*  Detecte le premier pixel noir et le stock dans lastPixel *)
-    while (!j < h && !fini = false) do
-      while (!i < w && !fini = false) do
-	let (r, g, b) = Sdlvideo.get_pixel_color img !i !j in
-	if r = 0 && g = 0 && b = 0 then
-	  begin
-	    fini := false;
+      while (!j < h && !fini = false) do
+	while (!i < w && !fini = false) do
+	  let (r, g, b) = Sdlvideo.get_pixel_color img !i !j in
+	  if r = 0 && g = 0 && b = 0 then
+	    begin
+	      fini := false;
 	      lastPixel := [(initPoint !i !j)]@(!lastPixel);
-	  end;
-	i := !i + 1
-      done;
+	    end;
+	  i := !i + 1
+	done;
 	j := !j + 1
-    done;
+      done;
 
-  while List.length !lastPixel > 0 do
-    (* Detecte la lettre et dessine un point au centre de celle ci *)
+      while List.length !lastPixel > 0 do
+(* (* Detecte la lettre et dessine un point au centre de celle ci *)
     let pointsDeLaLettre = ref ( scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).x)
-    and moy = getMiddlePoint (!pointsDeLaLettre) in ();
-  done;
-    end
+    in moy = (getMiddlePoint (!pointsDeLaLettre)) in
+    begin
+      pixelsNoirs := moy::(!pixelsNoirs);
+      Sdlvideo.set_pixel_color img moy.x moy.y;
+    end;*)
+()
+      done;
+    end 
