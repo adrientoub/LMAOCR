@@ -17,6 +17,10 @@ type pixel =
 let get_dims img =
   ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
 
+let deleteFirst l = match l with
+    [] -> []
+  | e::l -> l
+
 let initPoint x0 y0 = 
   {
     x = x0;
@@ -80,7 +84,7 @@ let transformToPoints img =
 	  if r = 0 && g = 0 && b = 0 then
 	    begin
 	      fini := false;
-	      lastPixel := [(initPoint !i !j)]@(!lastPixel);
+	      lastPixel := (initPoint !i !j)::(!lastPixel);
 	    end;
 	  i := !i + 1
 	done;
@@ -94,6 +98,37 @@ let transformToPoints img =
     begin
       pixelsNoirs := moy::(!pixelsNoirs);
       Sdlvideo.put_pixel_color img moy.x moy.y (0,0,0);
+      let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 15) in
+      if (List.length !nextLetter > 0) then
+	lastPixel := (List.nth !nextLetter 0)::(!lastPixel);
+      lastPixel := deleteFirst !lastPixel;
     end;
       done;
+      Sdlvideo.save_BMP img "points1.bmp";
+      let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
+      begin
+	(* Ajout des premiers pixels *)
+	for i = 0 to (List.length !pixelsNoirs) / 2 - 1 do
+	  !moyFinal1.x <- !moyFinal1.x + (List.nth !pixelsNoirs i).x;
+	  !moyFinal1.y <- !moyFinal1.y + (List.nth !pixelsNoirs i).y;
+	done;
+	(* Division des premiers pixels *)
+	if (List.length !pixelsNoirs / 2) > 0 then
+	  begin
+	    !moyFinal1.x <- !moyFinal1.x / ( (List.length !pixelsNoirs) / 2);
+	    !moyFinal1.y <- !moyFinal1.y / ( (List.length !pixelsNoirs) / 2);
+	  end;
+	(* Ajout des seconds pixels buuuuug*)
+	for i = (List.length !pixelsNoirs) / 2 to (List.length !pixelsNoirs) - 1 do
+	  !moyFinal2.x <- !moyFinal2.x + (List.nth !pixelsNoirs i).x;
+	  !moyFinal2.y <- !moyFinal2.y + (List.nth !pixelsNoirs i).y;
+	done;
+	(* Division des seconds pixels *)
+	if (List.length !pixelsNoirs - List.length !pixelsNoirs / 2) > 0 then
+	  begin
+	    !moyFinal1.x <- !moyFinal1.x / ( (List.length !pixelsNoirs) / 2);
+	    !moyFinal1.y <- !moyFinal1.y / ( (List.length !pixelsNoirs) / 2);
+	  end
+      end
+      
     end 
