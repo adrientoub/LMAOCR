@@ -124,28 +124,88 @@ let getMedianList list =
    else 
      List.nth list (length/2)  
 
+(* Get the median value of an array *)
+let getMedianArray tab =
+  let length = Array.length tab in
+    if length mod 2 = 1 then
+      tab.((length/2 + 1))
+    else
+      tab.((length/2))
+
+(* Get the relaxed median value of an array *)
+let getRelaxedMedianArray tab cp =
+  if (cp > getMedianArray tab) && (cp < getMedianArray tab + 1) then
+    cp
+  else
+    getMedianArray tab
+
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
 let square3x3ToList img x y = 
   begin
   let listPixel = ref [] in
   for i = x-1 to x+1 do
     for j = y-1 to y+1 do
-      if isInBound img x y then
-	listPixel := addSort (level (Sdlvideo.get_pixel_color img i j)) !listPixel;
+      (* if isInBound img x y then *)
+	listPixel := (1.)::(!listPixel)
     done;
   done;
-  !listPixel
-  end 
+  List.sort (function x -> function y -> match (x,y) with
+      (x,y) when x < y -> 1
+    | (x,y) when x = y -> 0
+    | _ -> -1) (!listPixel)
+  end
+
+(* Put level of pixels around center pixel in a array (in a sorted way) *)
+let square3x3ToArray img x y = 
+  begin       
+    let cpt = ref 0 in
+     for i = x-1 to x+1 do
+       for j = y-1 to y+1 do
+	 if isInBound img x y then
+	   cpt := !cpt + 1;
+       done;
+     done;
+    let tabPixel = Array.make !cpt 0.  (*Array.Init !cpt (function n -> 0.) *)
+    and cpt2 = ref 0 in  
+    for i = x-1 to x+1 do
+      for j = y-1 to y+1 do
+	 if isInBound img x y then
+	   tabPixel.(!cpt2) <- (level(Sdlvideo.get_pixel_color img i j));
+	   cpt2 := !cpt2 + 1;
+       done;
+     done;
+    Array.sort (function x -> function y -> match (x,y) with
+      (x,y) when x < y -> 1
+    | (x,y) when x = y -> 0
+    | _ -> -1) tabPixel;
+    tabPixel;
+  end
     
 (* Apply median filter *)
 let applyFilterMedian img dst =
   let (w,h) = get_dims img in  
   for i = 0 to w-1 do
     for j = 0 to h-1 do
-      let color = int_of_float(getMedianList(square3x3ToList img i j) *. 255.) in
-      Sdlvideo.put_pixel_color dst i j (color,color,color)
+      if isInBound img i j then 
+	  let color = int_of_float(getMedianArray(square3x3ToArray img i j) *. 255.) in
+	  Sdlvideo.put_pixel_color dst i j (color,color,color)
     done 
   done
+
+(* Apply relaxed median filter *)
+let applyFilterMedian img dst =
+  let (w,h) = get_dims img in  
+  for i = 0 to w-1 do
+    for j = 0 to h-1 do
+      if isInBound img i j then 
+      	let squarePixel = square3x3ToArray img i j 
+      	and centerPixelLevel = level Sdlvideo.get_pixel_color img i j in
+      	let relaxedMedian = getRelaxedMedianArray squarePixel centerPixelLevel in 
+	let color = int_of_float(relaxedMedian) in
+	  Sdlvideo.put_pixel_color dst i j (color,color,color)
+    done 
+  done
+  
   
 (* ------------ "scrub?" ------------ *)
 
