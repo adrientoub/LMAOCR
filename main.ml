@@ -60,7 +60,7 @@ let main () =
     (* Initialisation de SDL *)
     sdl_init ();
     (* Chargement d'une image *)
-    let img = Sdlloader.load_image Sys.argv.(1) in
+    let img = Sdlloader.load_image Sys.argv.(1) in  let test = Angle.transformToPoints img in 
     (* On récupère les dimensions *)
     let (w,h) = get_dims img in(*
     let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
