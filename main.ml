@@ -73,7 +73,7 @@ let main () =
     Angle.transformToPoints img points;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
-    Rotate.rotateWeighted binarizedImage finalImage angle;
+    Rotate.rotate binarizedImage finalImage angle;
     (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     (* on affiche l'image *)
