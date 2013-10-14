@@ -88,13 +88,12 @@ let transformToPoints img =
       done;
 
       while List.length !lastPixel > 0 do
-(* (* Detecte la lettre et dessine un point au centre de celle ci *)
-    let pointsDeLaLettre = ref ( scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).x)
-    in moy = (getMiddlePoint (!pointsDeLaLettre)) in
+ (* Detecte la lettre et dessine un point au centre de celle ci *)
+    let pointsDeLaLettre = ref ( scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y)
+    in let moy = (getMiddlePoint (!pointsDeLaLettre)) in
     begin
       pixelsNoirs := moy::(!pixelsNoirs);
-      Sdlvideo.set_pixel_color img moy.x moy.y;
-    end;*)
-()
+      Sdlvideo.put_pixel_color img moy.x moy.y (0,0,0);
+    end;
       done;
     end 
