@@ -173,6 +173,7 @@ let multLocal tabPixel tabCoeff =
     failwith "Arrays need to have the same length"
 
 
+(*
 (* Weighted rotation *)
 let rotateWeighted img dst angDegre =
   let ang = degreToRadian angDegre in
@@ -203,6 +204,6 @@ let rotateWeighted img dst angDegre =
      done
 	
 
-     
+     *)
      
 
