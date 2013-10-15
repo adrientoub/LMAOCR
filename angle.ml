@@ -97,14 +97,16 @@ let transformToPoints img output =
 	in let moy = (getMiddlePoint (!pointsDeLaLettre)) in
 	   begin
 	     pixelsNoirs := moy::(!pixelsNoirs);
-	     Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
+	     Sdlvideo.put_pixel_color output moy.x moy.y (255,255,255);
 	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 15) in
 	     if (List.length !nextLetter > 0) then
 	       lastPixel := (List.nth !nextLetter 0)::(!lastPixel);
 	     lastPixel := deleteFirst !lastPixel;
 	   end;
       done;
+      Rotate.toWhite output;
       Sdlvideo.save_BMP output "points1.bmp";
+
       let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
       begin
 	(* Ajout des premiers pixels *)

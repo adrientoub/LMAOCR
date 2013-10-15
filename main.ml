@@ -69,9 +69,8 @@ let main () =
     Filters.applyScrubFilter greyImage filteredImage;*)
     let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Binarization.binarization img binarizedImage;
-    let lol = Sdlvideo.create_RGB_surface_format img [] w h in
-    Binarization.binarization img lol;
-
+    let points = Sdlvideo.create_RGB_surface_format img [] w h in
+    Angle.transformToPoints img points;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
     Rotate.rotateWeighted binarizedImage finalImage angle;
