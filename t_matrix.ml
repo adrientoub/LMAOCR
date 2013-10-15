@@ -20,7 +20,7 @@ type matrix =
   }
 
 (* Create a new white matrix with given width and height *)
-let initMatrix width height =
+let init width height =
   let new_matrix =
     {
        w = width;
@@ -48,7 +48,19 @@ let set matrix x y color =
     matrix;
     end  
   else
-    failwith "Out of matrix's bounds!"    
+    failwith "Out of matrix's bounds!"  
+
+(* Copy matrix *)
+let copy matrixToCopy =
+  begin
+  let matrixCopied = init (matrixToCopy.w) (matrixToCopy.h)   in 
+  for i = 0 to matrixCopied.w - 1 do
+    for j = 0 to matrixCopied.h -1 do
+      matrixCopied.matrix.(i).(j) <- matrixToCopy.matrix.(i).(j);
+    done;
+  done;
+  matrixCopied;
+  end
 
 (* Put the img in a matrix *)
 let imgToMatrix img =  
@@ -105,7 +117,8 @@ let multLocal tabPixel tabCoeff =
 (* Apply the covolution matrix to the whole source matrix *)
 let multMatrix matrix tabCoeff = 
   begin
-    let (w,h) = (matrix.w, matrix.h) in
+    let matrixDst = copy matrix       
+    and (w,h) = (matrix.w, matrix.h) in
     for i = 0 to w-1 do
       for j = 0 to h-1 do
 	let tabPixel = Array.create_matrix 3 3 (Array.make 3 0) in
@@ -119,9 +132,10 @@ let multMatrix matrix tabCoeff =
 	  done;
 	done;
 	let color = (multLocal tabPixel tabCoeff) in
-	set matrix i j color
+	set matrixDst i j color
       done;
     done;
-    matrix;
+    matrixDst;
     end
 	
+
