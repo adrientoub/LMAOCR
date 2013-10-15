@@ -58,8 +58,6 @@ let imageToGrey img dst =
 
 (* ------------ Median Filter Grey --------------- *)
 
-
-
 (* Get the median value of an array of level *)
 let getMedianArrayGrey tab =
   let length = Array.length tab in
@@ -120,13 +118,36 @@ let squareToArrayGrey img x y =
 
 (* Put level of pixels around center pixel in a array (in a sorted way), assuming the pixel has 8 neighbors *)
 let square3x3ToArrayGrey img x y = 
-  begin
+ (*  begin
     let tabPixel = Array.make 9 0.  (*Array.Init !cpt (function n -> 0.) *)
     and cpt = ref 0 in  
     for i = x-1 to x+1 do
       for j = y-1 to y+1 do	 
 	   tabPixel.(!cpt) <- (level(Sdlvideo.get_pixel_color img i j));
 	   cpt := !cpt + 1;
+       done;
+     done;
+    Array.sort (function x -> function y -> match (x,y) with
+      (x,y) when x < y -> 1
+    | (x,y) when x = y -> 0
+    | _ -> -1) tabPixel;
+    tabPixel;
+  end *)
+begin       
+    let cpt = ref 0 in
+     for i = x-1 to x+1 do
+       for j = y-1 to y+1 do
+	 if isInBound img x y then
+	   cpt := !cpt + 1;
+       done;
+     done;
+    let tabPixel = Array.make !cpt 0.  (*Array.Init !cpt (function n -> 0.) *)
+    and cpt2 = ref 0 in  
+    for i = x-1 to x+1 do
+      for j = y-1 to y+1 do
+	 if isInBound img x y then
+	   tabPixel.(!cpt2) <- (level(Sdlvideo.get_pixel_color img i j));
+	   cpt2 := !cpt2 + 1;
        done;
      done;
     Array.sort (function x -> function y -> match (x,y) with
@@ -186,11 +207,6 @@ let applyMixedFilterMedian img dst =
 	  Sdlvideo.put_pixel_color dst i j (colorGrey, colorGrey, colorGrey)
     done
   done
-
-
-
-
-
 
 (* ------------- Median Filter Color --------------- *)
 (*
