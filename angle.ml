@@ -67,15 +67,14 @@ let getVoisins img x y rayon =
        !point.y <- !point.y / List.length l;
    end; !point
 
-let transformToPoints img =
+let transformToPoints img output =
     let (w, h) = get_dims img
-    and bpp = 8 and rmask = Int32.of_int(255) and gmask = Int32.of_int(255) and bmask = Int32.of_int(255) and amask = Int32.of_int(255) in
-  let output = Sdlvideo.create_RGB_surface [] w h bpp rmask gmask bmask amask (* <--- POURQUOI CETTE LIGNE PLANTE ? and
+    and
 	fini = ref false and 
 	lastPixel = ref [] and pixelsNoirs = ref [] and
-	i = ref 0 and j = ref 0*) in
+	i = ref 0 and j = ref 0  in
     begin
-(*      scanned := (Array.create_matrix w h false); (* Initialise le tableau de scan *)
+      scanned := (Array.create_matrix w h false); (* Initialise le tableau de scan *)
 (*  Detecte le premier pixel noir et le stock dans lastPixel *)
       while (!j < h && !fini = false) do
 	while (!i < w && !fini = false) do
@@ -129,5 +128,5 @@ let transformToPoints img =
 	    !moyFinal1.y <- !moyFinal1.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 	  end
       end
-*) 
+
     end 
