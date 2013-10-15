@@ -69,8 +69,9 @@ let main () =
     Filters.applyScrubFilter greyImage filteredImage;*)
     let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Binarization.binarization img binarizedImage;
+    (* Creer un fichier qui a remplacé les lettre par des points *)
     let points = Sdlvideo.create_RGB_surface_format img [] w h in
-    Angle.transformToPoints img points;
+    Angle.transformToPoints binarizedImage points;
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
     Rotate.rotate binarizedImage finalImage angle;

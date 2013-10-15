@@ -76,6 +76,8 @@ let transformToPoints img output =
 	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0  in
     begin
+      Rotate.toWhite output;
+      Sdlvideo.save_BMP img "bin.bmp";
       scanned := (Array.create_matrix w h false); (* Initialise le tableau de scan *)
 (*  Detecte le premier pixel noir et le stock dans lastPixel *)
       while (!j < h && !fini = false) do
@@ -83,6 +85,7 @@ let transformToPoints img output =
 	  let (r, g, b) = Sdlvideo.get_pixel_color img !i !j in
 	  if r = 0 && g = 0 && b = 0 then
 	    begin
+	      Printf.printf "Trouve";
 	      fini := false;
 	      lastPixel := (initPoint !i !j)::(!lastPixel);
 	    end;
@@ -98,13 +101,14 @@ let transformToPoints img output =
 	   begin
 	     pixelsNoirs := moy::(!pixelsNoirs);
 	     Sdlvideo.put_pixel_color output moy.x moy.y (255,255,255);
+	     Printf.printf "Done";
 	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 15) in
 	     if (List.length !nextLetter > 0) then
 	       lastPixel := (List.nth !nextLetter 0)::(!lastPixel);
 	     lastPixel := deleteFirst !lastPixel;
 	   end;
       done;
-      Rotate.toWhite output;
+
       Sdlvideo.save_BMP output "points1.bmp";
 
       let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
