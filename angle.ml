@@ -86,12 +86,12 @@ let transformToPoints img output =
 	  if r = 0 && g = 0 && b = 0 then
 	    begin
 	      Printf.printf "Trouve";
-	      fini := false;
+	      fini := true;
 	      lastPixel := (initPoint !i !j)::(!lastPixel);
 	    end;
-	  i := !i + 1
+	  i := !i + 1;
 	done;
-	j := !j + 1
+	j := !j + 1;
       done;
 
       while List.length !lastPixel > 0 do
@@ -100,7 +100,7 @@ let transformToPoints img output =
 	in let moy = (getMiddlePoint (!pointsDeLaLettre)) in
 	   begin
 	     pixelsNoirs := moy::(!pixelsNoirs);
-	     Sdlvideo.put_pixel_color output moy.x moy.y (255,255,255);
+	     Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
 	     Printf.printf "Done";
 	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 15) in
 	     if (List.length !nextLetter > 0) then
