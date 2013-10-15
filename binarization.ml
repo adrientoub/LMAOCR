@@ -42,14 +42,14 @@ let binarization src dst =
   Filters.applyRelaxedFilterMedian greyImage filteredImage;
   for x=0 to w-1 do
     for y=0 to h-1 do
-      let (color,_,_) = Sdlvideo.get_pixel_color greyImage x y in 
+      let (color,_,_) = Sdlvideo.get_pixel_color filteredImage x y in 
       v := !v + color;
     done;
   done;
 let seuil = int_of_float (((float_of_int !v)) /. (float_of_int (w*h))) in
 for j=0 to w-1 do
   for k=0 to h-1 do
-    let (color,_,_) = Sdlvideo.get_pixel_color greyImage j k in
+    let (color,_,_) = Sdlvideo.get_pixel_color filteredImage j k in
     if color <= seuil then
       Sdlvideo.put_pixel_color dst j k (0,0,0)
     else 
