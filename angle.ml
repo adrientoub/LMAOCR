@@ -68,8 +68,9 @@ let getVoisins img x y rayon =
    end; !point
 
 let transformToPoints img =
-    let (w, h) = get_dims img in
-    let output = Sdlvideo.create_RGB_surface_format img [] w h (* <--- POURQUOI CETTE LIGNE PLANTE ? and
+    let (w, h) = get_dims img
+    and bpp = 8 and rmask = Int32.of_int(255) and gmask = Int32.of_int(255) and bmask = Int32.of_int(255) and amask = Int32.of_int(255) in
+  let output = Sdlvideo.create_RGB_surface [] w h bpp rmask gmask bmask amask (* <--- POURQUOI CETTE LIGNE PLANTE ? and
 	fini = ref false and 
 	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0*) in

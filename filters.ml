@@ -134,10 +134,10 @@ let getMedianArrayGrey tab =
 
 (* Get the relaxed median value of an array of level *)
 let getRelaxedMedianArrayGrey tab cp =
-  if (cp > getMedianArray tab) && (cp < getMedianArray tab +. 1.) then
+  if (cp > getMedianArrayGrey tab) && (cp < getMedianArrayGrey tab +. 1.) then
     cp
   else
-    getMedianArray tab
+    getMedianArrayGrey tab
 
 (* Put level of pixels around center pixel in a list (in a sorted way) *)
 let square3x3ToListGrey img x y = 
@@ -188,8 +188,8 @@ let square3x3ToArrayGrey img x y =
     and cpt = ref 0 in  
     for i = x-1 to x+1 do
       for j = y-1 to y+1 do	 
-	   tabPixel.(!cpt2) <- (level(Sdlvideo.get_pixel_color img i j));
-	   cpt2 := !cpt2 + 1;
+	   tabPixel.(!cpt) <- (level(Sdlvideo.get_pixel_color img i j));
+	   cpt := !cpt + 1;
        done;
      done;
     Array.sort (function x -> function y -> match (x,y) with
@@ -209,9 +209,9 @@ let filterMedianGrey img x y =
 (* Return the relaxed median level for a given pixel in a image, needed for mixed median filter, assume that the pixel is in bounds *)
 let relaxedFilterMedianGrey img x y =
   let squarePixelLevel = square3x3ToArrayGrey img x y 
-  and centerPixelLevel = = level (Sdlvideo.get_pixel_color img x y) in
-  let relaxedMedianlevel = getRelaxedMedianArrayGrey squarePixelLevel centerPixelLevel in
-  let colorGrey = int_of_float(relaxedMedianLevel *. 255.) in
+  and centerPixelLevel = level (Sdlvideo.get_pixel_color img x y) in
+  let relaxedMedianLevel = getRelaxedMedianArrayGrey squarePixelLevel centerPixelLevel in
+  let colorGrey = int_of_float (relaxedMedianLevel  *. 255.) in
   colorGrey  
     
 (* Apply median filter for a grey output using filterMedianGrey *)
