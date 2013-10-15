@@ -35,6 +35,8 @@ let getMedianList list =
 
 (* ------------- Image to grey --------------- *)
 
+
+
 (* Calculate the luminosity of a pixel *)
 let level (r,g,b) =
   let rf = float_of_int r and gf = float_of_int g and bf = float_of_int b
@@ -57,6 +59,20 @@ let imageToGrey img dst =
 
 
 (* ------------ Median Filter Grey --------------- *)
+
+
+(* insert an elt in a sorted list *)
+let rec addSort x list = 
+  match list with
+      [] -> [x]
+    |h::t -> if x <= h then x::h::t else h::addSort x t 
+
+let getMedianList list = 
+  let length = List.length list in
+   if length mod 2 = 1 then
+     List.nth list (length/2 + 1)
+   else 
+     List.nth list (length/2) 
 
 (* Get the median value of an array of level *)
 let getMedianArrayGrey tab =
@@ -118,7 +134,7 @@ let squareToArrayGrey img x y =
 
 (* Put level of pixels around center pixel in a array (in a sorted way), assuming the pixel has 8 neighbors *)
 let square3x3ToArrayGrey img x y = 
- (*  begin
+   begin
     let tabPixel = Array.make 9 0.  (*Array.Init !cpt (function n -> 0.) *)
     and cpt = ref 0 in  
     for i = x-1 to x+1 do
@@ -132,30 +148,7 @@ let square3x3ToArrayGrey img x y =
     | (x,y) when x = y -> 0
     | _ -> -1) tabPixel;
     tabPixel;
-  end *)
-begin       
-    let cpt = ref 0 in
-     for i = x-1 to x+1 do
-       for j = y-1 to y+1 do
-	 if isInBound img x y then
-	   cpt := !cpt + 1;
-       done;
-     done;
-    let tabPixel = Array.make !cpt 0.  (*Array.Init !cpt (function n -> 0.) *)
-    and cpt2 = ref 0 in  
-    for i = x-1 to x+1 do
-      for j = y-1 to y+1 do
-	 if isInBound img x y then
-	   tabPixel.(!cpt2) <- (level(Sdlvideo.get_pixel_color img i j));
-	   cpt2 := !cpt2 + 1;
-       done;
-     done;
-    Array.sort (function x -> function y -> match (x,y) with
-      (x,y) when x < y -> 1
-    | (x,y) when x = y -> 0
-    | _ -> -1) tabPixel;
-    tabPixel;
-  end
+  end 
 
 (* Return the median level for a given pixel in a image, needed for mixed median filter, assume that the pixel is in bounds *)
 let filterMedianGrey img x y = 
@@ -185,7 +178,7 @@ let applyFilterMedianGrey img dst =
   
 
 (* Apply relaxed median filter for a grey output using relaxedFilterMedianGrey *)
-let applyRelaxedFilterMedian img dst =
+let applyRelaxedFilterMedianGrey img dst =
   let (w,h) = get_dims img in  
   for i = 0 to w-1 do
     for j = 0 to h-1 do  
@@ -195,7 +188,7 @@ let applyRelaxedFilterMedian img dst =
     done 
   done
 
-let applyMixedFilterMedian img dst = 
+let applyMixedFilterMedianGrey img dst = 
   let (w,h) = get_dims img in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
@@ -207,6 +200,7 @@ let applyMixedFilterMedian img dst =
 	  Sdlvideo.put_pixel_color dst i j (colorGrey, colorGrey, colorGrey)
     done
   done
+  
 
 (* ------------- Median Filter Color --------------- *)
 (*
