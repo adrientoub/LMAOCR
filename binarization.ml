@@ -56,4 +56,38 @@ for j=0 to w-1 do
       Sdlvideo.put_pixel_color dst j k (255,255,255)
   done
 done
+
+(* La binarisqtion qui prends en compte mes filtres, pas commce celle au dessus, par contre faut rajouter les autres trucs *)
+(*
+let binarization src dst = 
+  let (w,h) = Rotate.get_dims src in
+  let greyImage = Sdlvideo.create_RGB_surface_format src [] w h in
+  image2grey src greyImage;
+  let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
+  (* let v = ref 0 in 
+  Filters.applyMixedFilterMedianGrey greyImage filteredImage;
+  for i = 0 to w - 1 do
+    for j= 0 to h - 1 do
+      Sdlvideo.put_pixel_color dst i j (Sdlvideo.get_pixel_color filteredImage i j);
+      
+    done
+  done
+ 
+  for x=0 to w-1 do
+    for y=0 to h-1 do
+      let (color,_,_) = Sdlvideo.get_pixel_color greyImage x y in 
+      v := !v + color;
+    done;
+  done;
+let seuil = int_of_float (((float_of_int !v)) /. (float_of_int (w*h))) in
+for j=0 to w-1 do
+  for k=0 to h-1 do
+    let (color,_,_) = Sdlvideo.get_pixel_color greyImage j k in
+    if color <= seuil then
+      Sdlvideo.put_pixel_color dst j k (0,0,0)
+    else 
+      Sdlvideo.put_pixel_color dst j k (255,255,255)
+  done
+done
+ *)
 				  
