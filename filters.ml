@@ -255,37 +255,14 @@ let filterMedianColor img x y =
    medianColor
   
   *)
-(* ------------ "scrub?" ------------ *)
 
-(* *)
-let scrubMatrixMult img x y = 
-  let rf = ref 0  and gf = ref 0  and bf = ref 0 in
-  for i = x-1 to x+1 do
-    for j = y-1 to y+1 do
-      if isInBound img i j then		
-        let (r,g,b) = Sdlvideo.get_pixel_color img i j in
-	  match (i,j) with
-	    (i,j) when (i,j) = (x,y) ->   begin
-	                                  rf := !rf + 5*r;
-	                                  gf := !gf + 5*g;
-	                                  bf := !bf + 5*b
-	                                  end
+(* ------------ Covolutions matrix ------------ *)
 
-	    |(_,_) ->                     begin
-	                                  rf := !rf + r;
-	                                  gf := !gf + g;
-	                                  bf := !bf + b;
-	                                  end
-    done;
-  done;     
-   (borne(!rf),borne(!gf),borne(!bf))
-
-(* *)
-let applyScrubFilter img dst = 
-  let (w,h) = get_dims img in
-  for i = 0 to w-1 do
-    for j = 0 to h-1 do
-      let color = scrubMatrixMult img i j in
-      Sdlvideo.put_pixel_color dst i j color
-    done
-  done
+let applyWeightedAverageFilter img dst tabCoeff = 
+  let imgMatrix = t_matrix.imgToMatrix img in
+  let imgDst = t_matrix.multMatrix imgMatrix tabCoeff
+  in t_matrix.matrixToImage imgDst 
+  
+    
+  
+  
