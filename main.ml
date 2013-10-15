@@ -85,5 +85,46 @@ let main () =
       (* on quitte *)
       exit 0
   end
+  
+  (* Le main qui marche pour l application des filtres *)
+(*
+let main () =
+  begin
+    (* Nous voulons en argument le nom du fichier *)
+    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
+      showHelp ();
+
+    (* détection de l'angle en ligne de commande *)
+    let angle = 
+    if Array.length (Sys.argv) >= 3 then 
+      float_of_string (Sys.argv.(2))
+    else 
+      0. in
+    (* Initialisation de SDL *)
+    sdl_init ();
+    (* Chargement d'une image *)
+    let img = Sdlloader.load_image Sys.argv.(1) in
+    (* On récupère les dimensions *)
+    let (w,h) = get_dims img in(*
+    let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
+    Binarization.image2grey img greyImage
+    let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
+    Filters.applyScrubFilter greyImage filteredImage;*)
+    let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
+    Binarization.binarization img binarizedImage;
+    (*let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
+    Rotate.toWhite finalImage;
+    Rotate.rotate binarizedImage finalImage angle;*)
+    (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
+    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
+    (* on affiche l'image *)
+    show binarizedImage display;
+    saveImage binarizedImage;
+      (* on attend une touche *)
+      wait_key ();
+      (* on quitte *)
+      exit 0
+  end
+  *)
  
 let _ = main ()
