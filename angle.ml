@@ -37,10 +37,12 @@ begin
 end
 
 let getVoisins img x y rayon =
-    let (w, h) = get_dims img and voisins = ref [] and (r, g, b) = Sdlvideo.get_pixel_color img x y in
+    let (w, h) = get_dims img and voisins = ref [] in
     for j = y - rayon to y + rayon do
        for i = x - rayon to x + rayon do
-	 if (i >= 0 && i < w && j >= 0 && j < h && r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false && i <> x && j <> y) then
+	 if (i >= 0 && i < w && j >= 0 && j < h) then
+	   let (r, g, b) = Sdlvideo.get_pixel_color img i j in
+	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false && i <> x && j <> y) then
 	   voisins := (initPoint i j)::(!voisins);
        done;
     done; !voisins

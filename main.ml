@@ -50,7 +50,7 @@ let main () =
     (* Nous voulons en argument le nom du fichier *)
     if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
       showHelp ();
-	
+
     (* détection de l'angle en ligne de commande *)
     let angle = 
     if Array.length (Sys.argv) >= 3 then 
@@ -59,20 +59,19 @@ let main () =
       0. in
     (* Initialisation de SDL *)
     sdl_init ();
-    Printf.printf "lol";
     (* Chargement d'une image *)
     let img = Sdlloader.load_image Sys.argv.(1) in
     (* On récupère les dimensions *)
-    let (w,h) = get_dims img in
-    (*
+    let (w,h) = get_dims img in(*
     let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
     Binarization.image2grey img greyImage
     let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Filters.applyScrubFilter greyImage filteredImage;*)
     let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    let _ = Binarization.binarization img binarizedImage in
-    (* let points1 = Sdlvideo.create_RGB_surface_format img [] w h in
-    let _ = Angle.transformToPoints binarizedImage points1 *)
+    Binarization.binarization img binarizedImage;
+    let lol = Sdlvideo.create_RGB_surface_format img [] w h in
+    Binarization.binarization img lol;
+
     let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
     Rotate.toWhite finalImage;
     Rotate.rotateWeighted binarizedImage finalImage angle;
