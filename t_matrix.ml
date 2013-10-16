@@ -9,6 +9,10 @@ let borneFloat x =
   else 
     x
 
+(* Get image's dimensions *)
+let get_dims img =
+  ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
+
 (* ------------------- Matrix ---------------------- *)
 
 (* type matrix composed by w = width, h = height and 2D array of color *)
@@ -45,7 +49,6 @@ let set matrix x y color =
   if isInMatrix matrix x y then
     begin
     matrix.matrix.(x).(y) <- color;
-    matrix;
     end  
   else
     failwith "Out of matrix's bounds!"  
@@ -66,7 +69,7 @@ let copy matrixToCopy =
 let imgToMatrix img =  
   begin
   let (w,h) = get_dims img in
-  let matrix = initMatrix w h in     
+  let matrix = init w h in     
     for i = 0 to w-1 do
       for j = 0 to h-1 do
 	matrix.matrix.(i).(j) <- Sdlvideo.get_pixel_color img i j
@@ -125,17 +128,19 @@ let multMatrix matrix tabCoeff =
 	for i2 = i - 1 to i + 1 do
 	  for j2 = j - 1 to j + 1 do
 	    if isInMatrix matrix i2 j2 then
-	      let (r,g,b) = get matrix i2 j2 in
-	      tabPixel.(i2).(j2).(0) <- r;
-	      tabPixel.(i2).(j2).(1) <- g;
-	      tabPixel.(i2).(j2).(2) <- b;
+	      begin
+		let (r,g,b) = get matrix i2 j2 in
+		tabPixel.(i2).(j2).(0) <- r;
+		tabPixel.(i2).(j2).(1) <- g;
+		tabPixel.(i2).(j2).(2) <- b;
+	      end;
 	  done;
 	done;
 	let color = (multLocal tabPixel tabCoeff) in
-	set matrixDst i j color
+	set matrixDst i j color;
       done;
     done;
     matrixDst;
-    end
+  end
 	
 
