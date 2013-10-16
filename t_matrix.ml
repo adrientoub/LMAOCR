@@ -29,7 +29,7 @@ let init width height =
     {
        w = width;
        h = height;       
-       matrix = Array.create_matrix width height (0,0,0);
+       matrix = Array.create_matrix width height (255,255,255);
     }
   in new_matrix
 
@@ -39,19 +39,11 @@ let isInMatrix matrix x y =
 
 (* Return the tab[x][y] color *) 
 let get matrix x y =
-  if isInMatrix matrix x y then
     matrix.matrix.(x).(y)
-  else
-    failwith "Out of matrix's bounds!"
     
 (* Set the tab[x][y] color *)
-let set matrix x y color =
-  if isInMatrix matrix x y then
-    begin
-    matrix.matrix.(x).(y) <- color;
-    end  
-  else
-    failwith "Out of matrix's bounds!"  
+let set matrix x y color =     
+    matrix.matrix.(x).(y) <- color 
 
 (* Copy matrix *)
 let copy matrixToCopy =
@@ -79,17 +71,14 @@ let imgToMatrix img =
   end
   
 (* Save the matrix in a image, return the image? *)
-let matrixToImg matrix = 
+let matrixToImg matrix dst = 
   begin
-  let w = matrix.w and h = matrix.h
-  and bpp = 8 and rmask = Int32.of_int(255) and gmask = Int32.of_int(255) and bmask = Int32.of_int(255) and amask = Int32.of_int(255) in
-  let img = Sdlvideo.create_RGB_surface [] w h bpp rmask gmask bmask amask in
-  for i = 0 to w-1 do
-    for j = 0 to h-1 do
-      Sdlvideo.put_pixel_color img i j matrix.matrix.(i).(j);
+    let (w,h) = get_dims dst in
+    for i = 0 to w-1 do
+      for j = 0 to h-1 do
+	Sdlvideo.put_pixel_color dst i j matrix.matrix.(i).(j);
+      done;
     done;
-  done;
-  img;
   end  
 
 (* Return the color of the central pixel after application of the covolution matrix.
@@ -115,7 +104,6 @@ let multLocal tabPixel tabCoeff =
       end
   else
     failwith "Arrays need to have the same length"
-
 
 (* Apply the covolution matrix to the whole source matrix *)
 let multMatrix matrix tabCoeff = 
