@@ -57,7 +57,7 @@ let getInitColor img srcX srcY decX decY =
   if initColor > 127 then 255 
   else 0
   
-*  ------------ Mandatory fonctions --------------- *)
+(*  ------------ Mandatory fonctions --------------- *)
 
 (* upper bound and lower bound x by 255. and 0. *)
 let borneFloat x =
@@ -125,7 +125,7 @@ let copy matrixToCopy =
 let imgToMatrix img =  
   begin
   let (w,h) = get_dims img in
-  let matrix = initMatrix w h in     
+  let matrix = init w h in     
     for i = 0 to w-1 do
       for j = 0 to h-1 do
 	matrix.matrix.(i).(j) <- Sdlvideo.get_pixel_color img i j

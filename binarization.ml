@@ -39,7 +39,7 @@ let binarization src dst =
   image2grey src greyImage;
   let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
   let v = ref 0 in
-  Filters.applyRelaxedFilterMedian greyImage filteredImage;
+  Filters.applyRelaxedFilterMedianGrey greyImage filteredImage;
   for x=0 to w-1 do
     for y=0 to h-1 do
       let (color,_,_) = Sdlvideo.get_pixel_color greyImage x y in 
@@ -90,4 +90,5 @@ for j=0 to w-1 do
   done
 done
  *)
+*)
 				  

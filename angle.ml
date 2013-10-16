@@ -42,8 +42,8 @@ let getVoisins img x y rayon =
        for i = x - rayon to x + rayon do
 	 if (i >= 0 && i < w && j >= 0 && j < h) then
 	   let (r, g, b) = Sdlvideo.get_pixel_color img i j in
-	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false && i <> x && j <> y) then
-	   voisins := (initPoint i j)::(!voisins);
+	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false) then
+	     voisins := (initPoint i j)::(!voisins);
        done;
     done; !voisins
 
@@ -91,6 +91,7 @@ let transformToPoints img output =
 	    end;
 	  i := !i + 1;
 	done;
+	i := 0;
 	j := !j + 1;
       done;
 
@@ -101,7 +102,7 @@ let transformToPoints img output =
 	   begin
 	     pixelsNoirs := moy::(!pixelsNoirs);
 	     Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-	     Printf.printf "Done";
+	     Printf.printf "POint x : %s POint y : %s\n" (string_of_int (List.nth !pointsDeLaLettre 0).x)  (string_of_int (List.nth !pointsDeLaLettre 0).y);
 	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 15) in
 	     if (List.length !nextLetter > 0) then
 	       lastPixel := (List.nth !nextLetter 0)::(!lastPixel);

@@ -45,6 +45,7 @@ let saveImage finalImage =
 
 
 (* main *)
+
 let main () =
   begin
     (* Nous voulons en argument le nom du fichier *)
@@ -85,7 +86,7 @@ let main () =
       (* on quitte *)
       exit 0
   end
-  
+
   (* Le main qui marche pour l application des filtres *)
 (*
 let main () =
