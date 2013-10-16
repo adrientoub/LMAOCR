@@ -1,3 +1,32 @@
+let pi = 3.141592654
+let scanned = ref (Array.create_matrix 1 1 false); (* Tableau qui contien les pixels scannés *)
+
+type point =
+{
+  mutable x: int;
+  mutable y: int;
+}
+
+type pixel = 
+{
+  mutable p: point;
+  mutable r: float array;
+}
+
+(* Get dimensions (width, heigth) of an image *)
+let get_dims img =
+  ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
+
+let deleteFirst l = match l with
+    [] -> []
+  | e::l -> l
+
+let initPoint x0 y0 = 
+  {
+    x = x0;
+    y = y0;
+  }
+
 let initPixel x0 y0  = 
 begin
   let p = { p = { x = x0; y = y0 }; r = Array.init 360 (function n -> 0.)} in 
@@ -7,6 +36,7 @@ begin
      done; p
 end
 
+(* Renvoie les pixels noirs non scannés dans un rayon de [rayon] *)
 let getVoisins img x y rayon =
     let (w, h) = get_dims img and voisins = ref [] in
     for j = y - rayon to y + rayon do
@@ -21,6 +51,7 @@ let getVoisins img x y rayon =
     done;
     !voisins
 
+(* Renvoie tous les pixels noirs liés au point [i] [j] *)
  let rec scanLetter img x y =
    !scanned.(x).(y) <- true;
     let voisins = ref (getVoisins img x y 1) and result = ref [] in
@@ -40,6 +71,18 @@ let getVoisins img x y rayon =
        !point.y <- !point.y / List.length l;
        !point
 
+(* Renvoie la distance approximative jusqu'a la prochaine lettre de la ligne *)
+ let getRayon l center = 
+   let rayon = ref 0. in
+   for i = 0 to (List.length l) - 1 do
+     let distance = sqrt( float_of_int ((List.nth l i).x - center.x) *. float_of_int ((List.nth l i).x - center.x) +. float_of_int ((List.nth l i).y - center.y) *. float_of_int ((List.nth l i).y - center.y)) in
+     if(distance > !rayon) then
+       rayon := distance +. 1.;
+   done;
+   int_of_float (!rayon *. 2. *. 1.5) 
+      
+
+(* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
     let (w, h) = get_dims img
     and
@@ -68,7 +111,7 @@ let transformToPoints img output =
 	i := 0;
 	j := !j + 1;
       done;
-
+(* Tant que l'on rencontre une lettre *)
       while List.length !lastPixel > 0 do
  (* Detecte la lettre et dessine un point au centre de celle ci *)
 	let pointsDeLaLettre = (scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y)
@@ -76,7 +119,7 @@ let transformToPoints img output =
 	   begin
 	     pixelsNoirs := moy::(!pixelsNoirs);
 	     Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-	     let nextLetter = ref (getVoisins img  moy.x moy.y 50) in
+	     let nextLetter = ref (getVoisins img  moy.x moy.y (getRayon pointsDeLaLettre moy)) in
 	     if (List.length !nextLetter > 0) then
 	       lastPixel := (!lastPixel)@[(List.nth !nextLetter 0)];
 	     lastPixel := deleteFirst !lastPixel;
