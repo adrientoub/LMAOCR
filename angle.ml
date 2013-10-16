@@ -44,36 +44,33 @@ let getVoisins img x y rayon =
 	   let (r, g, b) = Sdlvideo.get_pixel_color img i j in
 	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false ) then
 	     begin
+		 Printf.printf "Trouve\n";
 	       voisins := (initPoint i j)::(!voisins);
 	     end;
        done;
-    done; !voisins
+    done;
+    !voisins
 
  let rec scanLetter img x y =
-  begin
     !scanned.(x).(y) <- true;
-    let voisins = ref (getVoisins img x y 1) in
-    begin
-      Printf.printf "Trouve\n";
-    (*print_int (List.length !voisins);*)
+   Printf.printf "Debut\n";
+    let voisins = ref (getVoisins img x y 1) and result = ref [] in
     for i = 0 to List.length !voisins - 1 do
-      voisins := (!voisins)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
+      result := (!result)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
     done;
-    end;
-    voisins := (initPoint x y)::(!voisins);
-    !voisins;
-  end
+    result := (!result)@[(initPoint x y)];
+    print_int (List.length !result);
+    !result
 
  let getMiddlePoint l = 
    let point = ref (initPoint 0 0) in
-   begin
      for i = 0 to List.length l - 1 do
 	 !point.x <- !point.x + (List.nth l i).x;
 	 !point.y <- !point.y + (List.nth l i).y;
      done;
        !point.x <- !point.x / List.length l;
        !point.y <- !point.y / List.length l;
-   end; !point
+       !point
 
 let transformToPoints img output =
     let (w, h) = get_dims img
@@ -106,12 +103,13 @@ let transformToPoints img output =
 
       while List.length !lastPixel > 0 do
  (* Detecte la lettre et dessine un point au centre de celle ci *)
-	let pointsDeLaLettre = ref ( scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y)
-	in let moy = (getMiddlePoint (!pointsDeLaLettre)) in
+	let pointsDeLaLettre = (scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y)
+	in let moy = (getMiddlePoint pointsDeLaLettre) in
 	   begin
+	     Printf.printf "tour";
 	     pixelsNoirs := moy::(!pixelsNoirs);
 	     Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-	     (*Printf.printf "Un pixel ayant %s pixels noirs ajouté aux coor: %s %s\n" (string_of_int (List.length !pointsDeLaLettre)) (string_of_int moy.x) (string_of_int moy.y);*)
+	     Printf.printf "osef d'en dessous\n";
 	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 50) in
 	     if (List.length !nextLetter > 0) then
 	       lastPixel := (!lastPixel)@[(List.nth !nextLetter 0)];
