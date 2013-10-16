@@ -42,8 +42,10 @@ let getVoisins img x y rayon =
        for i = x - rayon to x + rayon do
 	 if (i >= 0 && i < w && j >= 0 && j < h) then
 	   let (r, g, b) = Sdlvideo.get_pixel_color img i j in
-	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false) then
-	     voisins := (initPoint i j)::(!voisins);
+	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false ) then
+	     begin
+	       voisins := (initPoint i j)::(!voisins);
+	     end;
        done;
     done; !voisins
 
@@ -51,9 +53,13 @@ let getVoisins img x y rayon =
   begin
     !scanned.(x).(y) <- true;
     let voisins = ref (getVoisins img x y 1) in
+    begin
+      Printf.printf "Trouve\n";
+    (*print_int (List.length !voisins);*)
     for i = 0 to List.length !voisins - 1 do
       voisins := (!voisins)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
     done;
+    end;
     voisins := (initPoint x y)::(!voisins);
     !voisins;
   end
@@ -85,9 +91,12 @@ let transformToPoints img output =
 	  let (r, g, b) = Sdlvideo.get_pixel_color img !i !j in
 	  if r = 0 && g = 0 && b = 0 then
 	    begin
-	      Printf.printf "Trouve";
-	      fini := true;
-	      lastPixel := (initPoint !i !j)::(!lastPixel);
+	      if(List.length (scanLetter img !i !j) > 1) then
+		begin
+		  (*Printf.printf "Premier pixel trouvé : %s %s \n" (string_of_int !i) (string_of_int !j);*)
+		  fini := true;
+		  lastPixel := (initPoint !i !j)::(!lastPixel);
+		end
 	    end;
 	  i := !i + 1;
 	done;
@@ -102,14 +111,15 @@ let transformToPoints img output =
 	   begin
 	     pixelsNoirs := moy::(!pixelsNoirs);
 	     Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-	     Printf.printf "POint x : %s POint y : %s\n" (string_of_int (List.nth !pointsDeLaLettre 0).x)  (string_of_int (List.nth !pointsDeLaLettre 0).y);
-	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 15) in
+	     (*Printf.printf "Un pixel ayant %s pixels noirs ajouté aux coor: %s %s\n" (string_of_int (List.length !pointsDeLaLettre)) (string_of_int moy.x) (string_of_int moy.y);*)
+	     let nextLetter = ref (getVoisins img  (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y 50) in
 	     if (List.length !nextLetter > 0) then
-	       lastPixel := (List.nth !nextLetter 0)::(!lastPixel);
+	       lastPixel := (!lastPixel)@[(List.nth !nextLetter 0)];
 	     lastPixel := deleteFirst !lastPixel;
 	   end;
       done;
-
+      print_int (List.length !pixelsNoirs);
+      Printf.printf " lettres trouvés et remplacés par des points\n";
       Sdlvideo.save_BMP output "points1.bmp";
 
       let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
