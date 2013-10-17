@@ -45,7 +45,7 @@ let getVoisins img x y rayon =
 	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false && (i = x && j = y) = false) then (* wtf i et j *)
 	     begin
 	       Printf.printf "Trouve\n";
-	       voisins := (initPoint i j)::(!voisins);
+	       voisins := (!voisins)@[(initPoint i j)];
 	     end;
        done;
     done;
@@ -53,13 +53,13 @@ let getVoisins img x y rayon =
 
  let rec scanLetter img x y =
     !scanned.(x).(y) <- true;
-   Printf.printf "Debut\n";
+   Printf.printf "Debut %s %s\n" (string_of_int x) (string_of_int y);
     let voisins = ref (getVoisins img x y 1) and result = ref [] in
     for i = 0 to List.length !voisins - 1 do
       result := (!result)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
     done;
     result := (!result)@[(initPoint x y)];
-    (*print_int (List.length !result);*)
+    print_int (List.length !result);
     Printf.printf "Fin\n";
     !result
 
@@ -134,7 +134,7 @@ let transformToPoints img output =
 	    !moyFinal1.x <- !moyFinal1.x / ( (List.length !pixelsNoirs) / 2);
 	    !moyFinal1.y <- !moyFinal1.y / ( (List.length !pixelsNoirs) / 2);
 	  end;
-	(* Ajout des seconds pixels buuuuug*)
+	(* Ajout des seconds pixels buuuuug ou pas*)
 	for i = (List.length !pixelsNoirs) / 2 to (List.length !pixelsNoirs) - 1 do
 	  !moyFinal2.x <- !moyFinal2.x + (List.nth !pixelsNoirs i).x;
 	  !moyFinal2.y <- !moyFinal2.y + (List.nth !pixelsNoirs i).y;
