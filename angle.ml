@@ -42,9 +42,9 @@ let getVoisins img x y rayon =
        for i = x - rayon to x + rayon do
 	 if (i >= 0 && i < w && j >= 0 && j < h) then
 	   let (r, g, b) = Sdlvideo.get_pixel_color img i j in
-	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false ) then
+	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false && (i = x && j = y) = false) then (* wtf i et j *)
 	     begin
-		 Printf.printf "Trouve\n";
+	       Printf.printf "Trouve\n";
 	       voisins := (initPoint i j)::(!voisins);
 	     end;
        done;
@@ -59,7 +59,8 @@ let getVoisins img x y rayon =
       result := (!result)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
     done;
     result := (!result)@[(initPoint x y)];
-    print_int (List.length !result);
+    (*print_int (List.length !result);*)
+    Printf.printf "Fin\n";
     !result
 
  let getMiddlePoint l = 
