@@ -74,8 +74,8 @@ let main () =
     Rotate.rotateWeighted binarizedImage finalImage angle; 
     (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
-    show finalImage display;
-   
+    show finalImage display;   
+    saveImage finalImage;
       (* on attend une touche *)
       wait_key ();
       (* on quitte *)
