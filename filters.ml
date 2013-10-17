@@ -139,9 +139,9 @@ let square3x3ToArrayGrey img x y =
     and cpt = ref 0 in  
     for i = x-1 to x+1 do
       for j = y-1 to y+1 do	
-	if isInBound img x y then 
-	  tabPixel.(!cpt) <- (level(Sdlvideo.get_pixel_color img i j));
-	else		
+	if isInBound img i j then 
+	  tabPixel.(!cpt) <- (level(Sdlvideo.get_pixel_color img i j))
+	else
 	  tabPixel.(!cpt) <- 0.;
 	cpt := !cpt + 1;
        done;
