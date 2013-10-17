@@ -9,6 +9,10 @@ let borneFloat x =
   else 
     x
 
+(* Calculate the luminosity of a pixel *)
+let level (r,g,b) =
+  let rf = float_of_int r and gf = float_of_int g and bf = float_of_int b
+  in (0.3*.rf +. 0.59*.gf +. 0.11*.bf)/.255.
 
 (* Convert degree to  radian *)
 let degreToRadian ang = 
@@ -42,7 +46,7 @@ let toWhite img =
 
   
 (* try to figure out where each pixel of the scanned image were in the original image (the image before scanning) *)
-let rotate img dst angDegre =
+let rotate img dst angDegre =  
   let (w,h) = get_dims img
   and ang = degreToRadian angDegre  in
   let cosAng = cos(ang) and sinAng = sin(ang) in
@@ -53,7 +57,7 @@ let rotate img dst angDegre =
 	and y = int_of_float (initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)) in
         if isInBound img x y then	  
 	  Sdlvideo.put_pixel_color dst x y (0,0,0)
-    done
+    done     
   done
 
 let float_of_color (color, _, _) = 
@@ -61,13 +65,13 @@ let float_of_color (color, _, _) =
 
 (* Do a weighted average of the source pixel with its neighbors, according to the percentage it overlaps them. *)
 let getWeightedColor matrix decX decY srcX srcY = 
-  let initColor = int_of_float (
-       (1. -. decX) *. (1. -. decY) *.(float_of_color (T_matrix.get matrix (truncate srcX) (truncate srcY)))
-    +. decX *. (1. -. decY) *. (float_of_color (T_matrix.get matrix (1 + truncate srcX) (truncate srcY)))
-    +. (1. -. decX) *. decY *. (float_of_color (T_matrix.get matrix (truncate srcX) (1 + truncate srcY)))
-    +. decX *. decY *. (float_of_color (T_matrix.get matrix(1 + truncate srcX) (1 + truncate srcY)))) in
-  if (initColor/4) > 127 then 255 
-  else 0
+  let xmore = if T_matrix.isInMatrix matrix (srcX - 1) srcY then srcX - 1 else srcX 
+  and ymore = if T_matrix.isInMatrix matrix srcX (srcY - 1) then srcY - 1 else srcY in 
+  let initColor = 
+       (1. -. decX) *. (1. -. decY) *. level (T_matrix.get matrix srcX srcY)
+    +. decX *. (1. -. decY) *. level (T_matrix.get matrix xmore srcY)
+    +. (1. -. decX) *. decY *. level (T_matrix.get matrix srcX ymore)
+    +. decX *. decY *. level (T_matrix.get matrix xmore ymore) in initColor
   
 (* Weighted rotation *)
 let rotateWeighted img dst angDegre =  
@@ -79,22 +83,18 @@ let rotateWeighted img dst angDegre =
   and cosAng = cos(ang) and sinAng = sin(ang) in     
   for i = 0 to w-1 do
     for j = 0 to h-1 do         
-      if (T_matrix.get imgMatrix i j) = (0,0,0) then
+    (*  if (T_matrix.get imgMatrix i j) = (0,0,0) then *)
 	let srcX = initX i j cosAng sinAng ((w-1)/2) ((h-1)/2)
 	and srcY = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in
 	let decX = srcX -. floor(srcX)
 	and decY = srcY -. floor(srcY) in        
-	let x = truncate srcX and y = truncate srcY in
-	if T_matrix.isInMatrix imgMatrix x y then
-	  let color = (getWeightedColor imgMatrix decX decY srcX srcY) in        
-	  if T_matrix.isInMatrix dstMatrix x y then	  
+	let x = truncate srcX and y = truncate srcY in	
+	if T_matrix.isInMatrix imgMatrix x y then	  
+	  let color = int_of_float ((getWeightedColor imgMatrix decX decY i j)*. 255.) in        
+	  if T_matrix.isInMatrix dstMatrix x y then	 
 	    T_matrix.set dstMatrix x y (color,color,color); 
     done;
-  done;
+  done; 
   T_matrix.matrixToImg dstMatrix dst
   end
   
-
-     
-     
-
