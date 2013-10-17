@@ -138,9 +138,12 @@ let square3x3ToArrayGrey img x y =
     let tabPixel = Array.make 9 0.  (*Array.Init !cpt (function n -> 0.) *)
     and cpt = ref 0 in  
     for i = x-1 to x+1 do
-      for j = y-1 to y+1 do	 
-	   tabPixel.(!cpt) <- (level(Sdlvideo.get_pixel_color img i j));
-	   cpt := !cpt + 1;
+      for j = y-1 to y+1 do	
+	if isInBound img x y then 
+	  tabPixel.(!cpt) <- (level(Sdlvideo.get_pixel_color img i j));
+	else		
+	  tabPixel.(!cpt) <- 0.;
+	cpt := !cpt + 1;
        done;
      done;
     Array.sort (function x -> function y -> match (x,y) with
@@ -175,7 +178,6 @@ let applyFilterMedianGrey img dst =
 	  Sdlvideo.put_pixel_color dst i j (colorGrey,colorGrey,colorGrey)
     done 
   done  
-  
 
 (* Apply relaxed median filter for a grey output using relaxedFilterMedianGrey *)
 let applyRelaxedFilterMedianGrey img dst =
@@ -187,20 +189,6 @@ let applyRelaxedFilterMedianGrey img dst =
 	  Sdlvideo.put_pixel_color dst i j (colorGrey,colorGrey,colorGrey)
     done 
   done
-
-let applyMixedFilterMedianGrey img dst = 
-  let (w,h) = get_dims img in
-  for i = 0 to w - 1 do
-    for j = 0 to h - 1 do
-      if (i = 0) || (i = w - 1) || (j = 0) || (j = h - 1) then
-	let colorGrey = filterMedianGrey img i j in
-	  Sdlvideo.put_pixel_color dst i j (colorGrey, colorGrey, colorGrey)
-      else
-	let colorGrey = relaxedFilterMedianGrey img i j in
-	  Sdlvideo.put_pixel_color dst i j (colorGrey, colorGrey, colorGrey)
-    done
-  done
-  
 
 (* ------------- Median Filter Color --------------- *)
 (*
