@@ -1,5 +1,5 @@
 let pi = 3.141592654
-let scanned = ref (Array.create_matrix 1 1 false); (* Tableau qui contien les pixels scannés *)
+let scanned = ref (Array.create_matrix 1 1 false); (* Tableau qui contient les pixels scannés *)
 
 type point =
 {
@@ -143,7 +143,7 @@ let transformToPoints img output =
 	    !moyFinal1.x <- !moyFinal1.x / ( (List.length !pixelsNoirs) / 2);
 	    !moyFinal1.y <- !moyFinal1.y / ( (List.length !pixelsNoirs) / 2);
 	  end;
-	(* Ajout des seconds pixels buuuuug ou pas*)
+	(* Ajout des seconds pixels *)
 	for i = (List.length !pixelsNoirs) / 2 to (List.length !pixelsNoirs) - 1 do
 	  !moyFinal2.x <- !moyFinal2.x + (List.nth !pixelsNoirs i).x;
 	  !moyFinal2.y <- !moyFinal2.y + (List.nth !pixelsNoirs i).y;
@@ -151,13 +151,13 @@ let transformToPoints img output =
 	(* Division des seconds pixels *)
 	if (List.length !pixelsNoirs - List.length !pixelsNoirs / 2) > 0 then
 	  begin
-	    !moyFinal1.x <- !moyFinal1.x / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
-	    !moyFinal1.y <- !moyFinal1.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
+	    !moyFinal2.x <- !moyFinal2.x / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
+	    !moyFinal2.y <- !moyFinal2.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 	  end;
 	Sdlvideo.put_pixel_color output !moyFinal1.x !moyFinal1.y (0,0,0);
 	Sdlvideo.put_pixel_color output !moyFinal2.x !moyFinal2.y (0,0,0);
-	Printf.printf "%s %s\n" (string_of_int !moyFinal1.x) (string_of_int !moyFinal1.y);
-	Printf.printf "%s %s\n" (string_of_int !moyFinal2.x) (string_of_int !moyFinal2.y);
+	Printf.printf "Point final 1 : %s %s\n" (string_of_int !moyFinal1.x) (string_of_int !moyFinal1.y);
+	Printf.printf "Point final 2 : %s %s\n" (string_of_int !moyFinal2.x) (string_of_int !moyFinal2.y);
 	Sdlvideo.save_BMP output "points2.bmp";
       end
 
