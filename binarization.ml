@@ -129,7 +129,7 @@ let minVariance histo numPixel =
 	minVar := var;
         treshold := i;      
     done;
-    treshold;
+    !treshold;
     end
 
 (* binarization using Otsu's method, src must be greyscaled *)
@@ -137,7 +137,7 @@ let binarizationOtsu src dst =
   let (w,h) = Function.get_dims src 
   and histo = getHistogramme src in
   let numPixel = w * h in
-  let histo = equalizationHisto numPixel in
+  equalizationHisto histo numPixel;
   let treshold = minVariance histo numPixel in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
