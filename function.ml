@@ -60,7 +60,7 @@ let toWhite img =
 let copyImg img dst =
   let (w,h) = get_dims img in
   for i = 0 to w - 1 do
-    for j = 0 to h - 1 to
+    for j = 0 to h - 1 do
 	Sdlvideo.put_pixel_color dst i j (Sdlvideo.get_pixel_color img i j)
     done
   done

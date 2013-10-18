@@ -76,6 +76,7 @@ let main () =
     
     (* Make a copy of the filtered image for the rotation *)
     let filteredImageCopy = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    Function.copyImg filteredImage filteredImageCopy;
     
     (* Binarize the filtered image using Ostu's method for setting the threshold *)
     Printf.printf "Binarization...\n";
