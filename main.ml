@@ -63,22 +63,22 @@ let main () =
     sdl_init ();
 
     (* Loading *)
-    Printf.print "Loading image";
+    Printf.printf "Loading image";
     let src = Sdlloader.load_image Sys.argv.(1) in
     Printf.printf "Image loaded";
 
     (* Apply filter against noise (currently a relaxed median filter) *)
     Printf.printf "Applying anti-noise filters";
-    let (w,h) = get_dims img in
+    let (w,h) = get_dims src in
     let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in      
     Filters.applyRelaxedFilterMedianGrey src filteredImage;
     Printf.printf "anti-noise filters applied";
     
     (* Make a copy of the filtered image for the rotation *)
-    let filteredImageCopie = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    let filteredImageCopy = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     
     (* Binarize the filtered image using Ostu's method for setting the threshold *)
-    Printf.Printf "Binarization...";
+    Printf.printf "Binarization...";
     let binarizedImage = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     Binarization.binarizationOtsu filteredImage binarizedImage;
     Printf.printf "Binarization done";
@@ -96,13 +96,15 @@ let main () =
     Rotate.rotateWeighted filteredImageCopy rotatedImage angle;
     Printf.printf "Rotation done";
     
+    
     (* Binarize the rotated image (again using Otsu's method) *)
-    let pretreatedImage = Sdlvideo.create_surface_format rotatedImage [] w h in
+    let pretreatedImage = Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
+    Binarization.binarization rotatedImage pretreatedImage;
     Printf.printf "Pretreatement done bitches";    
         
     (* Create the display surface in doublebuffering with the image size *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
-    show finalImage display;   
+    show pretreatedImage display;   
     saveImage pretreatedImage;
       (* on attend une touche *)
       wait_key ();
