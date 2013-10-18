@@ -123,7 +123,7 @@ let minVariance histo numPixel =
   begin
     let minVar = ref 0. 
     and treshold = ref 0 in
-    for i = 0 to 256 do
+    for i = 0 to 255 do
       let var = variance histo i numPixel in
       if var < !minVar then
 	minVar := var;

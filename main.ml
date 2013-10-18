@@ -80,7 +80,7 @@ let main () =
     (* Binarize the filtered image using Ostu's method for setting the threshold *)
     Printf.printf "Binarization...";
     let binarizedImage = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
-    Binarization.binarizationOtsu filteredImage binarizedImage;
+    Binarization.binarization filteredImage binarizedImage;
     Printf.printf "Binarization done";
       
     (* Detect the angle using Hough transform *)
