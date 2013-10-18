@@ -59,48 +59,48 @@ let main () =
       0. in
 
     (* Initialisation of SDL *)
-    Printf.printf "Initialisation";
+    Printf.printf "Initialisation\n";
     sdl_init ();
 
     (* Loading *)
-    Printf.printf "Loading image";
+    Printf.printf "Loading image\n";
     let src = Sdlloader.load_image Sys.argv.(1) in
-    Printf.printf "Image loaded";
+    Printf.printf "Image loaded\n";
 
     (* Apply filter against noise (currently a relaxed median filter) *)
-    Printf.printf "Applying anti-noise filters";
+    Printf.printf "Applying anti-noise filters\n";
     let (w,h) = get_dims src in
     let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in      
     Filters.applyRelaxedFilterMedianGrey src filteredImage;
-    Printf.printf "anti-noise filters applied";
+    Printf.printf "Anti-noise filters applied\n";
     
     (* Make a copy of the filtered image for the rotation *)
     let filteredImageCopy = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     
     (* Binarize the filtered image using Ostu's method for setting the threshold *)
-    Printf.printf "Binarization...";
+    Printf.printf "Binarization...\n";
     let binarizedImage = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     Binarization.binarization filteredImage binarizedImage;
-    Printf.printf "Binarization done";
+    Printf.printf "Binarization done\n";
       
     (* Detect the angle using Hough transform *)
-    Printf.printf "Angle detecting...";
+    Printf.printf "Angle detecting...\n";
     let points = Sdlvideo.create_RGB_surface_format binarizedImage [] w h in
     Angle.transformToPoints binarizedImage points;
-    Printf.printf "Angle found!";
+    Printf.printf "Angle found!\n";
     
     (* Rotation using Bilinear interpolation after the rotation is done *)  
-    Printf.printf "Rotating...";
+    Printf.printf "Rotating...\n";
     let rotatedImage = Sdlvideo.create_RGB_surface_format filteredImageCopy [] w h in
     Function.toWhite rotatedImage;
     Rotate.rotateWeighted filteredImageCopy rotatedImage angle;
-    Printf.printf "Rotation done";
+    Printf.printf "Rotation done\n";
     
     
     (* Binarize the rotated image (again using Otsu's method) *)
     let pretreatedImage = Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarization rotatedImage pretreatedImage;
-    Printf.printf "Pretreatement done bitches";    
+    Printf.printf "Pretreatement done bitches\n";    
         
     (* Create the display surface in doublebuffering with the image size *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
