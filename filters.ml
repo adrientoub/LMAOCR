@@ -252,6 +252,13 @@ let applyLinearFilter img dst tabCoeff =
   let imgMatrix = T_matrix.imgToMatrix img in
   let dstMatrix = T_matrix.multMatrix imgMatrix tabCoeff
   in T_matrix.matrixToImg dstMatrix dst 
+  
+  
+let applyPasseHautFilter img dst =
+  begin
+  applyLinearFilter img dst passeHaut; 
+  end
+    
     
   
   
