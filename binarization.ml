@@ -83,6 +83,7 @@ let otsuThreshold histo numPixel =
     and fWeight = ref  0.
     and fMean = ref 0.
     and treshold = ref 0
+    and treshold2 = ref 0
     and maxVariance = ref 0.
     and currentVariance = ref 0.
     and sum = ref 0. in
@@ -93,28 +94,31 @@ let otsuThreshold histo numPixel =
     while !i <= 255 do
       bWeight := !bWeight +. float_of_int histo.(!i);
       if (!bWeight <> 0.) then
-	begin
-	  fWeight := numPixel -. !bWeight;
-	  if (!fWeight = 0.) then
-	    i := 256
-	  else 
-	    begin
-	      bSum := !bSum +. float_of_int !i *. float_of_int histo.(!i);
-	      bMean := !bSum /. !bWeight;
-	      fMean := (!sum -. !bSum) /. !fWeight;
-	      currentVariance := !bWeight *. !fWeight *. ((!bMean -. !fMean)**2.);
-	      if !currentVariance > !maxVariance then
-		begin
-		  maxVariance := !currentVariance;
-		  treshold := !i;
-		end;
-	    end; 
-	end;
-	  i := !i +1;
+        begin
+          fWeight := numPixel -. !bWeight;
+          if (!fWeight = 0.) then
+            i := 256
+          else 
+            begin
+              bSum := !bSum +. float_of_int !i *. float_of_int histo.(!i);
+              bMean := !bSum /. !bWeight;
+              fMean := (!sum -. !bSum) /. !fWeight;
+              currentVariance := !bWeight *. !fWeight *. ((!bMean -. !fMean)**2.);
+              if !currentVariance > !maxVariance then
+                begin
+                  maxVariance := !currentVariance;
+                  treshold := !i;
+		  treshold2 := !i;
+                end;
+              if !currentVariance = !maxVariance then 
+		treshold2 := !i;
+            end; 
+        end;
+          i := !i +1;
     done;
-    !treshold;
-    end	
-
+    ((!treshold + !treshold2) / 2)
+    end    
+    
 (* binarization using Otsu's method, src must be greyscaled *)
 let binarizationOtsu src dst = 
   let (w,h) = Function.get_dims src 
