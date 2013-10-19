@@ -246,13 +246,13 @@ let filterMedianColor img x y =
 
 (* ------------ Covolutions matrix ------------ *)
 
-(*
+let passeHaut = [| [|0,-1,0|], [|-1,5,-1|], [|0,-1,0|] |];;
 
-let applyWeightedAverageFilter img dst tabCoeff = 
+let applyLinearFilter img dst tabCoeff = 
   let imgMatrix = t_matrix.imgToMatrix img in
   let imgDst = t_matrix.multMatrix imgMatrix tabCoeff
   in t_matrix.matrixToImage imgDst 
   
     
-  *)
+  
   
