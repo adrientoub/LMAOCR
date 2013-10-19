@@ -249,10 +249,9 @@ let filterMedianColor img x y =
 let passeHaut = [| [|0,-1,0|], [|-1,5,-1|], [|0,-1,0|] |];;
 
 let applyLinearFilter img dst tabCoeff = 
-  let imgMatrix = t_matrix.imgToMatrix img in
-  let imgDst = t_matrix.multMatrix imgMatrix tabCoeff
-  in t_matrix.matrixToImage imgDst 
-  
+  let imgMatrix = T_matrix.imgToMatrix img in
+  let dstMatrix = T_matrix.multMatrix imgMatrix tabCoeff
+  in T_matrix.matrixToImg dstMatrix dst 
     
   
   
