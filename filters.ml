@@ -246,8 +246,6 @@ let filterMedianColor img x y =
 
 (* ------------ Covolutions matrix ------------ *)
 
-let passeHaut = [| [|0,-1,0|], [|-1,5,-1|], [|0,-1,0|] |];;
-
 let applyLinearFilter img dst tabCoeff = 
   let imgMatrix = T_matrix.imgToMatrix img in
   let dstMatrix = T_matrix.multMatrix imgMatrix tabCoeff
@@ -256,7 +254,8 @@ let applyLinearFilter img dst tabCoeff =
   
 let applyPasseHautFilter img dst =
   begin
-  applyLinearFilter img dst passeHaut; 
+    let passeHaut = [| [|0.;-1.;0.|]; [|-1.;5.;-1.|]; [|0.;-1.;0.|] |] in
+    applyLinearFilter img dst passeHaut; 
   end
     
     
