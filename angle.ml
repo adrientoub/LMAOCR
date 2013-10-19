@@ -80,11 +80,20 @@ let getVoisins img x y rayon =
        rayon := distance +. 1.;
    done;
    int_of_float (!rayon *. 2. *. 1.5) 
-      
+  
+(* Renvoie l'angle entre p1 et p2 *)
+let getAngle img p1 p2 =
+  let (_,h) = get_dims img in
+  let p1x = float_of_int p1.x and p1y = float_of_int (h - p1.y) and p2x = float_of_int p2.x and p2y = float_of_int (h - p2.y) in
+  if (p1x < p2x) then
+    atan ( (p2y -. p1y) /. (p2x -. p1x)) *. 180. /. pi
+  else
+    atan ( (p1y -. p2y) /. (p1x -. p2x)) *. 180. /. pi
+          
 
 (* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
-    let (w, h) = get_dims img and test = 42
+    let (w, h) = get_dims img and test = 1
     and 
 	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0 and finalList = ref [] in
@@ -120,8 +129,13 @@ let transformToPoints img output =
 		  done;
 		  if (List.length !pixelsNoirs > 1) then
 		    begin
-		      print_int (List.length !pixelsNoirs);
-		      Printf.printf " lettres trouvés et remplacés par des points.\n";
+		      (* Test *)
+		      if (List.length !finalList = test) then
+			begin
+			  print_int (List.length !pixelsNoirs);
+			  Printf.printf " lettres trouvés et remplacés par des points.\n";
+			end;
+
 		      let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
 		      begin
 		    (* Ajout des premiers pixels *)
@@ -146,17 +160,11 @@ let transformToPoints img output =
 			    !moyFinal2.x <- !moyFinal2.x / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 			    !moyFinal2.y <- !moyFinal2.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 			  end;
-			(*Printf.printf "Point final 1 : %s %s\n" (string_of_int !moyFinal1.x) (string_of_int !moyFinal1.y);
-			Printf.printf "Point final 2 : %s %s\n" (string_of_int !moyFinal2.x) (string_of_int !moyFinal2.y);*)
-			finalList := (90.)::(!finalList);
-			Printf.printf "%s\n" (string_of_int (List.length !finalList));
-			(*if (!moyFinal2.x < !moyFinal1.x) then
-			  let temp = !moyFinal2 in
-			  begin
-			    moyFinal2 := !moyFinal1;
-			    moyFinal1 := temp;
-			  end;
-			 let angle = atan ((float_of_int !moyFinal2.y -. (float_of_int !moyFinal1.y) ) /. (float_of_int !moyFinal2.x -. (float_of_int !moyFinal1.x) )) in*)
+
+			let angle = getAngle img !moyFinal1 !moyFinal2 in
+			finalList := angle::(!finalList);
+			if (List.length !finalList = test + 1) then
+			  Printf.printf "%s\n" (string_of_float angle);
 
 		      end
 		    end;
@@ -169,5 +177,4 @@ let transformToPoints img output =
 	j := !j + 1;
       done;
       Sdlvideo.save_BMP output "rendu.bmp";
-
     end 
