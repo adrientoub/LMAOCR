@@ -76,9 +76,11 @@ let getHistogramme img =
 
 (* The histogramme will contains the probability of occurrence of level in the image *)
 let equalizationHisto histo n = 
+  let eqHisto = Array.init 256 (fun x -> 0.) in
   for i = 0 to 255 do
-    histo.(i) <- histo.(i) / n
-  done
+    eqHisto.(i) <- float_of_int (histo.(i)) /. float_of_int (n);
+  done;
+  eqHisto
 
 (* Calcule the within class variance for a given pixel in a equalized histogramme *)
 let variance histo tresh numPixel =
@@ -88,15 +90,15 @@ let variance histo tresh numPixel =
     and bWeight = ref  0.
     and bMean = ref 0.
     and bVariance = ref 0. in  
-    for i = 0 to tresh-1 do 
-      bWeight := !bWeight +. float_of_int histo.(i);
-      bMean := !bMean +. float_of_int (i * histo.(i));
+    for i = 0 to tresh do 
+      bWeight := !bWeight +. histo.(i);
+      bMean := !bMean +. (float_of_int (i)) *. histo.(i);
       bNumPixel := !bNumPixel +. 1.;
     done;
     bWeight := !bWeight /. float_of_int numPixel;
     bMean := !bMean /. !bNumPixel;
-    for i = 0 to tresh-1 do
-      bVariance := !bVariance +. ((((float_of_int i) -. !bMean)**2.) *. (float_of_int histo.(i)));
+    for i = 0 to tresh do
+      bVariance := !bVariance +. ((((float_of_int i) -. !bMean)**2.) *. histo.(i));
     done;
     if (!bNumPixel = 0.) then 
       bNumPixel := 1.;
@@ -106,20 +108,21 @@ let variance histo tresh numPixel =
     and fWeight = ref  0.
     and fMean = ref 0.
     and fVariance = ref 0. in  
-    for i = tresh to 255 do 
-      fWeight := !fWeight +. float_of_int histo.(i);
-      fMean := !fMean +. float_of_int (i * histo.(i));
+    for i = tresh+1 to 255 do 
+      fWeight := !fWeight +. histo.(i);
+      fMean := !fMean +. float_of_int(i) *. histo.(i);
       fNumPixel := !fNumPixel +. 1.;
     done;
     if (!fNumPixel = 0.) then
       fNumPixel := 1.;
     fWeight := !fWeight /. float_of_int numPixel;
     fMean := !fMean /. !fNumPixel;
-    for i = tresh to 255 do
-      fVariance := !fVariance +. ((((float_of_int i) -. !fMean)**2.) *. (float_of_int histo.(i)));
+    for i = tresh+1 to 255 do
+      fVariance := !fVariance +. ((((float_of_int i) -. !fMean)**2.) *. histo.(i));
     done;
     fVariance := !fVariance /. !fNumPixel;
     let intraClasseVariance  = !bWeight *. !bVariance +. !fWeight *. !fVariance in
+    Printf.printf "bW : %f . bV : %f . fW : %f . fV : %f. iCV : %f" !bWeight !bVariance !fWeight !fVariance intraClasseVariance;
     intraClasseVariance;
     end	
 
@@ -144,8 +147,8 @@ let binarizationOtsu src dst =
   let (w,h) = Function.get_dims src 
   and histo = getHistogramme src in
   let numPixel = w * h in
-  equalizationHisto histo numPixel;
-  let treshold = minVariance histo numPixel in
+  let eqHisto = equalizationHisto histo numPixel in
+  let treshold = minVariance eqHisto numPixel in
   Printf.printf "%i" treshold;
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
