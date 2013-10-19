@@ -21,6 +21,18 @@ let deleteFirst l = match l with
     [] -> []
   | e::l -> l
 
+let getMedian l = 
+  if ((List.length l mod 2) = 0) then
+    ((List.nth l (List.length l / 2)) +. (List.nth l (List.length l / 2 - 1))) /. 2.
+  else
+    (List.nth l (List.length l / 2))    
+
+let compareTo a b =
+  if (a < b) then
+    (-1)
+  else
+    1
+
 let initPoint x0 y0 = 
   {
     x = x0;
@@ -93,7 +105,7 @@ let getAngle img p1 p2 =
 
 (* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
-    let (w, h) = get_dims img and test = 1
+    let (w, h) = get_dims img and test = 42
     and 
 	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0 and finalList = ref [] in
@@ -120,7 +132,7 @@ let transformToPoints img output =
 			     pixelsNoirs := moy::(!pixelsNoirs);
 			     if (List.length !finalList = test) then
 			       Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-			     let nextLetter = ref (getVoisins img  moy.x moy.y (getRayon pointsDeLaLettre moy)) in
+			     let nextLetter = ref (getVoisins img  moy.x moy.y (50)) in
 			     if (List.length !nextLetter > 0) then
 			       lastPixel := (!lastPixel)@[(List.nth !nextLetter 0)];
 			   end;
@@ -138,31 +150,32 @@ let transformToPoints img output =
 
 		      let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
 		      begin
-		    (* Ajout des premiers pixels *)
+			(* Ajout des premiers pixels *)
 			for i = 0 to (List.length !pixelsNoirs) / 2 - 1 do
 			  !moyFinal1.x <- !moyFinal1.x + (List.nth !pixelsNoirs i).x;
 			  !moyFinal1.y <- !moyFinal1.y + (List.nth !pixelsNoirs i).y;
 			done;
-		    (* Division des premiers pixels *)
+			(* Division des premiers pixels *)
 			if (List.length !pixelsNoirs / 2) > 0 then
 			  begin
 			    !moyFinal1.x <- !moyFinal1.x / ( (List.length !pixelsNoirs) / 2);
 			    !moyFinal1.y <- !moyFinal1.y / ( (List.length !pixelsNoirs) / 2);
 			  end;
-		    (* Ajout des seconds pixels *)
+			(* Ajout des seconds pixels *)
 			for i = (List.length !pixelsNoirs) / 2 to (List.length !pixelsNoirs) - 1 do
 			  !moyFinal2.x <- !moyFinal2.x + (List.nth !pixelsNoirs i).x;
 			  !moyFinal2.y <- !moyFinal2.y + (List.nth !pixelsNoirs i).y;
 			done;
-		    (* Division des seconds pixels *)
+			(* Division des seconds pixels *)
 			if (List.length !pixelsNoirs - List.length !pixelsNoirs / 2) > 0 then
 			  begin
 			    !moyFinal2.x <- !moyFinal2.x / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 			    !moyFinal2.y <- !moyFinal2.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 			  end;
-
+			(* Ajout de l'angle a la liste *)
 			let angle = getAngle img !moyFinal1 !moyFinal2 in
 			finalList := angle::(!finalList);
+			(* Test *)
 			if (List.length !finalList = test + 1) then
 			  Printf.printf "%s\n" (string_of_float angle);
 
@@ -177,4 +190,6 @@ let transformToPoints img output =
 	j := !j + 1;
       done;
       Sdlvideo.save_BMP output "rendu.bmp";
-    end 
+      finalList := (List.sort compareTo !finalList);
+      Printf.printf "angle final : %s" (string_of_float (getMedian !finalList));
+    end;
