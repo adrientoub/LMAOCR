@@ -42,10 +42,76 @@ let saveImage finalImage =
       if (length >= i+1) then 
 	  Sdlvideo.save_BMP finalImage Sys.argv.(i+1);
  done
-
-
+ 
 (* main *)
 
+let main () =
+  begin
+    (* Get image file name *)
+    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
+      showHelp ();
+
+    (* get the rotation's angle *)
+    let angle = 
+    if Array.length (Sys.argv) >= 3 then 
+      float_of_string (Sys.argv.(2))
+    else 
+      0. in
+
+    (* Initialisation of SDL *)
+    Printf.printf "Initialisation";
+    sdl_init ();
+
+    (* Loading *)
+    Printf.print "Loading image";
+    let src = Sdlloader.load_image Sys.argv.(1) in
+    Printf.printf "Image loaded";
+
+    (* Apply filter against noise (currently a relaxed median filter) *)
+    Printf.printf "Applying anti-noise filters";
+    let (w,h) = get_dims img in
+    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in      
+    Filters.applyRelaxedFilterMedianGrey src filteredImage;
+    Printf.printf "anti-noise filters applied";
+    
+    (* Make a copy of the filtered image for the rotation *)
+    let filteredImageCopie = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    
+    (* Binarize the filtered image using Ostu's method for setting the threshold *)
+    Printf.Printf "Binarization...";
+    let binarizedImage = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    Binarization.binarizationOtsu filteredImage binarizedImage;
+    Printf.printf "Binarization done";
+      
+    (* Detect the angle using Hough transform *)
+    Printf.printf "Angle detecting...";
+    let points = Sdlvideo.create_RGB_surface_format binarizedImage [] w h in
+    Angle.transformToPoints binarizedImage points;
+    Printf.printf "Angle found!";
+    
+    (* Rotation using Bilinear interpolation after the rotation is done *)  
+    Printf.printf "Rotating...";
+    let rotatedImage = Sdlvideo.create_RGB_surface_format filteredImageCopy [] w h in
+    Function.toWhite rotatedImage;
+    Rotate.rotateWeighted filteredImageCopy rotatedImage angle;
+    Printf.printf "Rotation done";
+    
+    (* Binarize the rotated image (again using Otsu's method) *)
+    let pretreatedImage = Sdlvideo.create_surface_format rotatedImage [] w h in
+    Printf.printf "Pretreatement done bitches";    
+        
+    (* Create the display surface in doublebuffering with the image size *)
+    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
+    show finalImage display;   
+    saveImage pretreatedImage;
+      (* on attend une touche *)
+      wait_key ();
+      (* on quitte *)
+      exit 0
+  end
+
+(* Old main *)
+(*
 let main () =
   begin
     (* Nous voulons en argument le nom du fichier *)
@@ -81,45 +147,6 @@ let main () =
       (* on quitte *)
       exit 0
   end
-
- (* Le main qui marche pour l application des filtres *)
-(*
-let main () =
-  begin
-    (* Nous voulons en argument le nom du fichier *)
-    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
-      showHelp ();
-    (* détection de l'angle en ligne de commande *)
-    let angle = 
-    if Array.length (Sys.argv) >= 3 then 
-      float_of_string (Sys.argv.(2))
-    else 
-      0. in
-    (* Initialisation de SDL *)
-    sdl_init ();
-    (* Chargement d'une image *)
-    let img = Sdlloader.load_image Sys.argv.(1) in
-    (* On récupère les dimensions *)
-    let (w,h) = get_dims img in(*
-    let greyImage = Sdlvideo.create_RGB_surface_format img [] w h in 
-    Binarization.image2grey img greyImage
-    let filteredImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Filters.applyScrubFilter greyImage filteredImage;*)
-    let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Binarization.binarization img binarizedImage;
-    (*let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Rotate.toWhite finalImage;
-    Rotate.rotate binarizedImage finalImage angle;*)
-    (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
-    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
-    (* on affiche l'image *)
-    show binarizedImage display;
-    saveImage binarizedImage;
-      (* on attend une touche *)
-      wait_key ();
-      (* on quitte *)
-      exit 0
-  end
 *)
- 
+
 let _ = main ()
