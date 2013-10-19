@@ -67,30 +67,12 @@ let getHistogramme img =
     and histo = Array.init 256 (fun x -> 0) in
     for i = 0 to w-1 do
       for j = 0 to h-1 do
-	let greyColor = int_of_float (Function.level (Sdlvideo.get_pixel_color img i j) *. 255.) in
+	let greyColor = truncate (Function.level (Sdlvideo.get_pixel_color img i j) *. 255.) in
 	histo.(greyColor) <- histo.(greyColor) + 1;
       done;
     done;
     histo
   end
-
-(* The histogramme will contains the probability of occurrence of level in the image *)
-let equalizationHisto histo n = 
-  for i = 0 to 256 do
-    histo.(i) <- histo.(i) / n
-  done
-
-
-(*
-let histoTest = Array.init 256 (fun x -> match x with   0 -> 8
-                                                   |1 -> 7 
-						   |2 -> 2
-						   |3 -> 6
-						   |4 -> 9
-						   |5 -> 4
-                                                   |_ -> 0);;
-    
-let x = otsuThreshold histoTest 36 *)
 
 (* Calcule the within class variance for a given pixel in a equalized histogramme *)
 let otsuThreshold histo numPixel =
@@ -98,8 +80,6 @@ let otsuThreshold histo numPixel =
     let bSum = ref 0.
     and bWeight = ref 0. 
     and bMean = ref 0.
-    and bVariance = ref 0.
-    and fNumPixel = ref 0.
     and fWeight = ref  0.
     and fMean = ref 0.
     and treshold = ref 0
@@ -108,19 +88,29 @@ let otsuThreshold histo numPixel =
     and sum = ref 0. in
     for i = 1 to 255 do
       sum := !sum +. float_of_int (i * histo.(i))
-    done;    
-    for i = 0 to 255 do
-      bWeight := !bWeight +. float_of_int histo.(i);
-      fWeight := numPixel -. !bWeight;
-      bSum := float_of_int i *. float_of_int histo.(i);
-      bMean := !bSum /. !bWeight;
-      fMean := (!sum -. !bSum) /. !fWeight;
-      currentVariance := !bWeight *. !fWeight *. ((!bMean -. !fMean)**2.);
-      if !currentVariance > !maxVariance then
+    done;
+    let i = ref 0 in
+    while !i <= 255 do
+      bWeight := !bWeight +. float_of_int histo.(!i);
+      if (!bWeight <> 0.) then
 	begin
-	  maxVariance := !currentVariance;
-	  treshold := i;
-	end
+	  fWeight := numPixel -. !bWeight;
+	  if (!fWeight = 0.) then
+	    i := 256
+	  else 
+	    begin
+	      bSum := !bSum +. float_of_int !i *. float_of_int histo.(!i);
+	      bMean := !bSum /. !bWeight;
+	      fMean := (!sum -. !bSum) /. !fWeight;
+	      currentVariance := !bWeight *. !fWeight *. ((!bMean -. !fMean)**2.);
+	      if !currentVariance > !maxVariance then
+		begin
+		  maxVariance := !currentVariance;
+		  treshold := !i;
+		end;
+	    end; 
+	end;
+	  i := !i +1;
     done;
     !treshold;
     end	
@@ -129,12 +119,17 @@ let otsuThreshold histo numPixel =
 let binarizationOtsu src dst = 
   let (w,h) = Function.get_dims src 
   and histo = getHistogramme src in
+  let nbVal = ref 0 in
+  for i=0 to 255 do
+    nbVal := histo.(i) + !nbVal;
+  done;
   let numPixel = w * h in
-  let treshold = otsuThreshold histo numPixel in
-  for i = 0 to w - 1 do
-    for j = 0 to h - 1 do
+  let treshold = otsuThreshold histo (float_of_int numPixel) in
+  Printf.printf "%i" treshold;
+  for i = 0 to w-1 do
+    for j = 0 to h-1 do
       let (color,_,_) = Sdlvideo.get_pixel_color src i j in
-      if color <= treshold then
+      if color < treshold then
 	Sdlvideo.put_pixel_color dst i j (0,0,0)
       else
 	Sdlvideo.put_pixel_color dst i j (255,255,255)
