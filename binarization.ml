@@ -76,7 +76,7 @@ let getHistogramme img =
 
 (* The histogramme will contains the probability of occurrence of level in the image *)
 let equalizationHisto histo n = 
-  for i = 0 to 256 do
+  for i = 0 to 255 do
     histo.(i) <- histo.(i) / n
   done
 
@@ -88,30 +88,34 @@ let variance histo tresh numPixel =
     and bWeight = ref  0.
     and bMean = ref 0.
     and bVariance = ref 0. in  
-    for i = 0 to tresh do 
+    for i = 0 to tresh-1 do 
       bWeight := !bWeight +. float_of_int histo.(i);
       bMean := !bMean +. float_of_int (i * histo.(i));
       bNumPixel := !bNumPixel +. 1.;
     done;
     bWeight := !bWeight /. float_of_int numPixel;
     bMean := !bMean /. !bNumPixel;
-    for i = 0 to tresh do
+    for i = 0 to tresh-1 do
       bVariance := !bVariance +. ((((float_of_int i) -. !bMean)**2.) *. (float_of_int histo.(i)));
     done;
+    if (!bNumPixel = 0.) then 
+      bNumPixel := 1.;
     bVariance := !bVariance /. !bNumPixel;
     (* Foreground shit *)
     let fNumPixel = ref 0.
     and fWeight = ref  0.
     and fMean = ref 0.
     and fVariance = ref 0. in  
-    for i = tresh+1 to 256 do 
+    for i = tresh to 255 do 
       fWeight := !fWeight +. float_of_int histo.(i);
       fMean := !fMean +. float_of_int (i * histo.(i));
       fNumPixel := !fNumPixel +. 1.;
     done;
+    if (!fNumPixel = 0.) then
+      fNumPixel := 1.;
     fWeight := !fWeight /. float_of_int numPixel;
     fMean := !fMean /. !fNumPixel;
-    for i = tresh+1 to 256 do
+    for i = tresh to 255 do
       fVariance := !fVariance +. ((((float_of_int i) -. !fMean)**2.) *. (float_of_int histo.(i)));
     done;
     fVariance := !fVariance /. !fNumPixel;
@@ -121,13 +125,16 @@ let variance histo tresh numPixel =
 
 let minVariance histo numPixel = 
   begin
-    let minVar = ref 0. 
+    let minVar = ref 255. 
     and treshold = ref 0 in
     for i = 0 to 255 do
       let var = variance histo i numPixel in
       if var < !minVar then
-	minVar := var;
-        treshold := i;      
+	begin
+	  Printf.printf "%i" !treshold;
+	  minVar := var;
+	  treshold := i;
+	end       
     done;
     !treshold;
     end
@@ -139,6 +146,7 @@ let binarizationOtsu src dst =
   let numPixel = w * h in
   equalizationHisto histo numPixel;
   let treshold = minVariance histo numPixel in
+  Printf.printf "%i" treshold;
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
       let (color,_,_) = Sdlvideo.get_pixel_color src i j in
