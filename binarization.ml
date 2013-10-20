@@ -175,14 +175,14 @@ let dilTab = Array.create_matrix 3 3 1
 (* Only 3*3 for now *)
 let dilatation imgBit dilTab = 
   let w = Array.length imgBit and h = Array.length imgBit.(0)  
-  and wTab = Array.length dilTab and hTab = Array.length dilTab.(0) 
+ (* and wTab = Array.length dilTab and hTab = Array.length dilTab.(0) *)
   and statut = ref 0 in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do      
-      for i2 = i - ((wTab-1)/2) to i + ((wTab-1)/2) do
-	for j2 = j - ((hTab-1)/2) to j + ((hTab-1)/2) do
-	 (* if Function.isInBound img i2 j2 then *)
-	    statut := !statut lor (imgBit.(i2).(j2) land dilTab.(i + i2 + 1).(j + j2 + 1));
+      for i2 = i - 1 to i + 1 do
+	for j2 = j - 1 to j + 1 do
+	  if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then 
+	    statut := !statut lor (imgBit.(i2).(j2) land dilTab.(i2 + 1).(j2 + 1));
         done;
       done;
       imgBit.(i).(j) <- !statut; 
@@ -196,14 +196,14 @@ let eroTab = Array.create_matrix 3 3 0
 (* Only 3*3 for now *)
 let erosion imgBit eroTab = 
   let w = Array.length imgBit and h = Array.length imgBit.(0)  
-  and wTab = Array.length eroTab and hTab = Array.length eroTab.(0) 
+  (* and wTab = Array.length eroTab and hTab = Array.length eroTab.(0) *)
   and statut = ref 1 in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do      
-      for i2 = i - ((wTab-1)/2) to i + ((wTab-1)/2) do
-	for j2 = j - ((hTab-1)/2) to j + ((hTab-1)/2) do
-	  (*if Function.isInBound img i2 j2 then*)
-	    statut := !statut land ((lnot imgBit.(i2).(j2)) land (lnot eroTab.(i + i2 + 1).(j + j2 + 1)));
+      for i2 = i - 1 to i + 1 do
+	for j2 = j - 1 to j + 1 do
+	   if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then 
+	     statut := !statut land ((lnot imgBit.(i2).(j2)) land (lnot eroTab.(i2 + 1).(j2 + 1)));
         done;
       done;
       imgBit.(i).(j) <- lnot !statut; 
@@ -213,9 +213,14 @@ let erosion imgBit eroTab =
 (* Opening *)
 let opening src dst =
   begin 
+    Printf.printf "loqding";
     let imgBit = toBit src in 
+    Printf.printf "loaded";
     erosion imgBit eroTab;
+    Printf.printf "erosion";
     dilatation imgBit dilTab;
+    Printf.printf "dila";
     bitToImg imgBit dst;
   end
+	
 	
