@@ -114,7 +114,7 @@ let getAngle img p1 p2 =
 
 (* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
-    let (w, h) = get_dims img and test = 35
+    let (w, h) = get_dims img
     and 
 	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0 and finalList = ref [] in
@@ -186,12 +186,12 @@ let transformToPoints img output =
 			(* Ajout de l'angle a la liste *)
 			let angle = getAngle img !moyFinal1 !moyFinal2 in
 			finalList := angle::(!finalList);
-			(* Test *)
+			(*(* Test *)
 			if (List.length !finalList = test + 1 || angle > 50.) then
 			  begin
 			    Printf.printf "Angle de la ligne : %s\n" (string_of_float angle);
 			    Sdlvideo.save_BMP output ("rendu/rendu" ^ (string_of_int (List.length !finalList )) ^".bmp");
-			  end;
+			  end;*)
 
 		      end
 		    end;
