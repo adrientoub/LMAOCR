@@ -1,8 +1,6 @@
 (* 
 Ce programme est un OCR développé par l'équipe HipsterEgg dans le cadre d'un projet de deuxième année à l'EPITA
 *)
-let get_dims img =
-  ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
  
 (* initialisation de SDL *)
 let sdl_init () =
@@ -30,6 +28,7 @@ let show img dst =
 let showHelp () = 
   Printf.printf "Pour lancer l'ocr utilisez les paramètres suivants : \n
 --help : afficher l'aide
+-help  : afficher l'aide
 ./lmaocr [nom du fichier] : lancer l'ocr avec l'image en paramètre
 ./lmaocr [nom du fichier] [angle] : lancer l'ocr avec l'angle défini en paramètre
 ./lmaocr [nom du fichier] [-o [sauvegarde]] : sauvegarde le rendu dans l'image sauvegarde\n";
@@ -48,7 +47,7 @@ let saveImage finalImage =
 let main () =
   begin
     (* Get image file name *)
-    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
+    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
       showHelp ();
 
     (* get the rotation's angle *)
@@ -69,7 +68,7 @@ let main () =
 
     (* Apply filter against noise (currently a relaxed median filter) *)
     Printf.printf "Applying anti-noise filters\n";
-    let (w,h) = get_dims src in
+    let (w,h) = Function.get_dims src in
     let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in      
     Filters.applyRelaxedFilterMedianGrey src filteredImage;
     Printf.printf "Anti-noise filters applied\n";
