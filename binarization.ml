@@ -139,3 +139,82 @@ let binarizationOtsu src dst =
 	Sdlvideo.put_pixel_color dst i j (255,255,255)
     done
   done
+  
+  (* -------------- Opening ----------- *)
+
+let toBit img =
+  begin
+  let (w,h) = get_dims img
+  and imgBit = Array.create_matrix w h 0 in
+  for i = 0 to w - 1 do
+    for j = 0 to h - 1 do
+      let (color,_,_) = Sdlvideo.get_pixel_color img i j in
+      if color = 0 then
+	imgBit.(i).(j) <- 1
+    done;
+  done;
+  imgBit;  
+  end
+
+let bitToImg imgBit dst =
+  begin
+    let (w,h) = (Array.length imgBit, Array.length imgBit.(0)) in
+    for i = 0 to w - 1 do
+      for j = 0 to h - 1 do
+	if imgBit.(i).(j) = 1 then
+	  Sdlvideo.put_pixel_color dst i j (0,0,0)
+	else
+	  Sdlvideo.put_pixel_color dst i j (255,255,255)
+      done
+    done
+
+(* Dilatation *)
+let dilTab = Array.create_matrix 3 3 1
+
+(* Only 3*3 for now *)
+let dilatation imgBit dilTab = 
+  let w = Array.length imgBit and h = Array.length imgBit.(0)  
+  and wTab = Array.length dilTab and hTab = Array.length dilTab.(0) 
+  and statut = ref 0 in
+  for i = 0 to w - 1 do
+    for j = 0 to h - 1 do      
+      for i2 = i - ((wTab-1)/2) to i + ((wTab-1)/2) do
+	for j2 = j - ((hTab-1)/2) to j + ((hTab-1)/2) do
+	 (* if Function.isInBound img i2 j2 then *)
+	    statut := !statut lor (imgBit.(i2).(j2) land dilTab.(i + i2 + 1).(j + j2 + 1));
+        done;
+      done;
+      imgBit.(i).(j) <- !statut; 
+    done
+  done
+      
+
+(* Erosion *)
+let eroTab = Array.create_matrix 3 3 0
+
+(* Only 3*3 for now *)
+let erosion imgBit eroTab = 
+  let w = Array.length imgBit and h = Array.length imgBit.(0)  
+  and wTab = Array.length eroTab and hTab = Array.length eroTab.(0) 
+  and statut = ref 1 in
+  for i = 0 to w - 1 do
+    for j = 0 to h - 1 do      
+      for i2 = i - ((wTab-1)/2) to i + ((wTab-1)/2) do
+	for j2 = j - ((hTab-1)/2) to j + ((hTab-1)/2) do
+	  (*if Function.isInBound img i2 j2 then*)
+	    statut := !statut land ((lnot imgBit.(i2).(j2)) land (lnot eroTab.(i + i2 + 1).(j + j2 + 1)));
+        done;
+      done;
+      imgBit.(i).(j) <- lnot !statut; 
+    done
+  done
+
+(* Opening *)
+let opening src dst =
+  begin 
+    let imgBit = toBit src in 
+    erosion imgBit eroTab;
+    dilation imgBit dilTab;
+    boolToImg imgBit dst;
+  end
+	
