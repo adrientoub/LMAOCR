@@ -116,7 +116,7 @@ let getAngle img p1 p2 =
 let transformToPoints img output =
     let (w, h) = get_dims img
     and 
-	lastPixel = ref [] and pixelsNoirs = ref [] and
+	lastPixel = ref [] and pixelsNoirs = ref [] and test = 1 and
 	i = ref 0 and j = ref 0 and finalList = ref [] in
     begin
       Sdlvideo.save_BMP img "bin.bmp";
@@ -124,13 +124,12 @@ let transformToPoints img output =
       (* Initialise le tableau de scan *)
       scanned := (Array.create_matrix w h false);
 (*  Detecte le premier pixel noir et le stock dans lastPixel *)
-      while (!j < h) do
-	while (!i < w) do
+      while (!j < h && (List.length !finalList) < 200) do
+	while (!i < w && (List.length !finalList) < 200) do
 	  let (r, g, b) = Sdlvideo.get_pixel_color img !i !j in
 	  if r = 0 && g = 0 && b = 0 && !scanned.(!i).(!j) = false then
 		begin
 		  lastPixel := (initPoint !i !j)::(!lastPixel);
-		  Rotate.toWhite output;
 		  (* Tant que l'on rencontre une lettre *)
 		  while List.length !lastPixel > 0 do
 		    (* Detecte la lettre et dessine un point au centre de celle ci *)
@@ -140,24 +139,28 @@ let transformToPoints img output =
 			 if (List.length pointsDeLaLettre > 1) then
 			   begin
 			     pixelsNoirs := moy::(!pixelsNoirs);
-			     (*if (List.length !finalList = test) then*)
+			     if (List.length !finalList = test) then
 			       Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-			     let nextLetter = (getVoisins img  moy.x moy.y (10)) in
+			     let nextLetter = (getVoisins img  moy.x moy.y (30)) in
 			     if (List.length nextLetter > 0) then
 			       let lePlusPres = getNearest nextLetter moy in
 			       lastPixel := (!lastPixel)@[lePlusPres];
+			   end
+			 else
+			   begin
 			   end;
+
 			 lastPixel := deleteFirst !lastPixel;
 		       end;
 		  done;
 		  if (List.length !pixelsNoirs > 1) then
 		    begin
 		      (* Test *)
-		      (*if (List.length !finalList = test) then
+		      if (List.length !finalList = test) then
 			begin
 			  print_int (List.length !pixelsNoirs);
 			  Printf.printf " lettres trouvés et remplacés par des points.\n";
-			end;*)
+			end;
 
 		      let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
 		      begin
@@ -184,14 +187,15 @@ let transformToPoints img output =
 			    !moyFinal2.y <- !moyFinal2.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
 			  end;
 			(* Ajout de l'angle a la liste *)
+			
 			let angle = getAngle img !moyFinal1 !moyFinal2 in
 			finalList := angle::(!finalList);
-			(*(* Test *)
-			if (List.length !finalList = test + 1 || angle > 50.) then
+			(* Test *)
+			if ((*List.length !finalList = test + 1 ||*) angle > 50.) then
 			  begin
 			    Printf.printf "Angle de la ligne : %s\n" (string_of_float angle);
-			    Sdlvideo.save_BMP output ("rendu/rendu" ^ (string_of_int (List.length !finalList )) ^".bmp");
-			  end;*)
+			    Sdlvideo.save_BMP output ("rendu/rendu" ^ (string_of_int (List.length !finalList - 1)) ^ ".bmp");
+			  end;
 
 		      end
 		    end;
@@ -203,7 +207,7 @@ let transformToPoints img output =
 	i := 0;
 	j := !j + 1;
       done;
-      
+       Sdlvideo.save_BMP output "rendu.bmp";
       finalList := (List.sort compareTo !finalList);
       let angle = getMedian !finalList in
       Printf.printf "Nombre de lignes : %i\n" (List.length !finalList);
