@@ -83,6 +83,15 @@ let getVoisins img x y rayon =
        !point.y <- !point.y / List.length l;
        !point
 
+ let distance a c =  sqrt( float_of_int ((a.x - c.x) * (a.x - c.x) + (a.y - c.y) * (a.y - c.y) ))
+
+ let getNearest l c = 
+    let predicate a b = 
+    if (distance a c) > (distance b c) then
+      1
+    else
+      -1 in (List.nth (List.sort predicate l) 0)
+
 (* Renvoie la distance approximative jusqu'a la prochaine lettre de la ligne *)
  let getRayon l center = 
    let rayon = ref 0. in
@@ -105,7 +114,7 @@ let getAngle img p1 p2 =
 
 (* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
-    let (w, h) = get_dims img and test = 42
+    let (w, h) = get_dims img and test = 160
     and 
 	lastPixel = ref [] and pixelsNoirs = ref [] and
 	i = ref 0 and j = ref 0 and finalList = ref [] in
@@ -132,9 +141,10 @@ let transformToPoints img output =
 			     pixelsNoirs := moy::(!pixelsNoirs);
 			     if (List.length !finalList = test) then
 			       Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
-			     let nextLetter = ref (getVoisins img  moy.x moy.y (50)) in
-			     if (List.length !nextLetter > 0) then
-			       lastPixel := (!lastPixel)@[(List.nth !nextLetter 0)];
+			     let nextLetter = (getVoisins img  moy.x moy.y (20)) in
+			     if (List.length nextLetter > 0) then
+			       let lePlusPres = getNearest nextLetter moy in
+			       lastPixel := (!lastPixel)@[lePlusPres];
 			   end;
 			 lastPixel := deleteFirst !lastPixel;
 		       end;
@@ -177,7 +187,7 @@ let transformToPoints img output =
 			finalList := angle::(!finalList);
 			(* Test *)
 			if (List.length !finalList = test + 1) then
-			  Printf.printf "%s\n" (string_of_float angle);
+			  Printf.printf "Angle de la ligne : %s\n" (string_of_float angle);
 
 		      end
 		    end;
@@ -191,5 +201,5 @@ let transformToPoints img output =
       done;
       Sdlvideo.save_BMP output "rendu.bmp";
       finalList := (List.sort compareTo !finalList);
-      Printf.printf "angle final : %s" (string_of_float (getMedian !finalList));
+      Printf.printf "Angle final : %s\nNombre de lignes : %i" (string_of_float (getMedian !finalList)) (List.length !finalList);
     end;
