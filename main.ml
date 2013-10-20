@@ -104,7 +104,7 @@ let main () =
     let pretreatedImage = Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarizationOtsu rotatedImage pretreatedImage;
  
-    Printf.printf "Pretreatement done bitches\n";    
+    Printf.printf "Pretreatement done\n";    
         
     (* Create the display surface in doublebuffering with the image size *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
@@ -119,44 +119,5 @@ let main () =
     (* on quitte *)
     exit 0
   end
-
-(* Old main *)
-(*
-let main () =
-  begin
-    (* Nous voulons en argument le nom du fichier *)
-    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) then
-      showHelp ();
-
-    (* détection de l'angle en ligne de commande *)
-    let angle = 
-    if Array.length (Sys.argv) >= 3 then 
-      float_of_string (Sys.argv.(2))
-    else 
-      0. in
-    (* Initialisation de SDL *)
-    sdl_init ();
-    (* Chargement d'une image *)
-    let img = Sdlloader.load_image Sys.argv.(1) in
-    (* On récupère les dimensions *)
-    let (w,h) = get_dims img in
-    let binarizedImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Binarization.binarization img binarizedImage;
-    (* Creer un fichier qui a remplacé les lettre par des points *)
-    let points = Sdlvideo.create_RGB_surface_format img [] w h in
-    Angle.transformToPoints binarizedImage points; 
-    let finalImage = Sdlvideo.create_RGB_surface_format img [] w h in
-    Rotate.toWhite finalImage;
-    Rotate.rotateWeighted binarizedImage finalImage angle; 
-    (* On crée la surface d'affichage en doublebuffering de la taille exacte de l'image *)
-    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
-    show finalImage display;   
-    saveImage finalImage;
-      (* on attend une touche *)
-      wait_key ();
-      (* on quitte *)
-      exit 0
-  end
-*)
 
 let _ = main ()

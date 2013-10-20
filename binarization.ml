@@ -129,7 +129,6 @@ let binarizationOtsu src dst =
   done;
   let numPixel = w * h in
   let treshold = otsuThreshold histo (float_of_int numPixel) in
-  Printf.printf "%i" treshold;
   for i = 0 to w-1 do
     for j = 0 to h-1 do
       let (color,_,_) = Sdlvideo.get_pixel_color src i j in
@@ -213,7 +212,7 @@ let erosion imgBit eroTab =
 (* Opening *)
 let opening src dst =
   begin 
-    Printf.printf "loqding";
+    Printf.printf "loading";
     let imgBit = toBit src in 
     Printf.printf "loaded";
     erosion imgBit eroTab;
