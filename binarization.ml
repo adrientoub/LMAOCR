@@ -144,8 +144,8 @@ let binarizationOtsu src dst =
 
 let toBit img =
   begin
-  let (w,h) = get_dims img
-  and imgBit = Array.create_matrix w h 0 in
+  let (w,h) = Function.get_dims img in
+  let imgBit = Array.create_matrix w h 0 in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
       let (color,_,_) = Sdlvideo.get_pixel_color img i j in
@@ -167,6 +167,7 @@ let bitToImg imgBit dst =
 	  Sdlvideo.put_pixel_color dst i j (255,255,255)
       done
     done
+end
 
 (* Dilatation *)
 let dilTab = Array.create_matrix 3 3 1
@@ -214,7 +215,7 @@ let opening src dst =
   begin 
     let imgBit = toBit src in 
     erosion imgBit eroTab;
-    dilation imgBit dilTab;
-    boolToImg imgBit dst;
+    dilatation imgBit dilTab;
+    bitToImg imgBit dst;
   end
 	
