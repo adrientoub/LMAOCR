@@ -52,11 +52,11 @@ let main () =
       showHelp ();
 
     (* get the rotation's angle *)
-    let angle = 
+    let angle = ref (
     if Array.length (Sys.argv) >= 3 then 
       float_of_string (Sys.argv.(2))
     else 
-      0. in
+      0.) in
 
     (* Initialisation of SDL *)
     Printf.printf "Initialisation\n";
@@ -87,14 +87,16 @@ let main () =
     (* Detect the angle using Hough transform *)
     Printf.printf "Angle detecting...\n";
     let points = Sdlvideo.create_RGB_surface_format binarizedImage [] w h in
-    Angle.transformToPoints binarizedImage points;
-    Printf.printf "Angle found!\n";
+    begin
+      angle := Angle.transformToPoints binarizedImage points;
+    Printf.printf "Angle found! %f\n" !angle;
+    end;
    
     (* Rotation using Bilinear interpolation after the rotation is done *)  
     Printf.printf "Rotating...\n";
     let rotatedImage = Sdlvideo.create_RGB_surface_format filteredImageCopy [] w h in
     Function.toWhite rotatedImage;
-    Rotate.rotateWeighted filteredImageCopy rotatedImage angle;
+    Rotate.rotateWeighted filteredImageCopy rotatedImage !angle;
     Printf.printf "Rotation done\n";
     
     
