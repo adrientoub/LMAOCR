@@ -103,23 +103,21 @@ let main () =
     (* Binarize the rotated image (again using Otsu's method) *)
     let pretreatedImage = Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarizationOtsu rotatedImage pretreatedImage;
-
- 
-    Extract.trace_lines pretreatedImage;
-    Extract.trace_lines_column pretreatedImage;
-    (*Extract.extract_lines pretreatedImage;
-    Extract.extract_lines_column pretreatedImage;*)
  
     Printf.printf "Pretreatement done bitches\n";    
         
     (* Create the display surface in doublebuffering with the image size *)
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
-    show pretreatedImage display;   
+    show pretreatedImage display;
+    wait_key ();
+    Extract.trace_lines pretreatedImage;
+    Extract.trace_lines_column pretreatedImage;
+    show pretreatedImage display;
     saveImage pretreatedImage;
-      (* on attend une touche *)
-      wait_key ();
-      (* on quitte *)
-      exit 0
+    (* on attend une touche *)
+    wait_key ();
+    (* on quitte *)
+    exit 0
   end
 
 (* Old main *)
