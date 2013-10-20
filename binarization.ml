@@ -76,80 +76,61 @@ let getHistogramme img =
 
 (* The histogramme will contains the probability of occurrence of level in the image *)
 let equalizationHisto histo n = 
-  let eqHisto = Array.init 256 (fun x -> 0.) in
-  for i = 0 to 255 do
-    eqHisto.(i) <- float_of_int (histo.(i)) /. float_of_int (n);
-  done;
-  eqHisto
+  for i = 0 to 256 do
+    histo.(i) <- histo.(i) / n
+  done
+
+
+(*
+let histoTest = Array.init 256 (fun x -> match x with   0 -> 8
+                                                   |1 -> 7 
+						   |2 -> 2
+						   |3 -> 6
+						   |4 -> 9
+						   |5 -> 4
+                                                   |_ -> 0);;
+    
+let x = otsuThreshold histoTest 36 *)
 
 (* Calcule the within class variance for a given pixel in a equalized histogramme *)
-let variance histo tresh numPixel =
-  begin
-    (* Background shit *)
-    let bNumPixel = ref 0.
-    and bWeight = ref  0.
+let otsuThreshold histo numPixel =
+  begin    
+    let bSum = ref 0.
+    and bWeight = ref 0. 
     and bMean = ref 0.
-    and bVariance = ref 0. in  
-    for i = 0 to tresh do 
-      bWeight := !bWeight +. histo.(i);
-      bMean := !bMean +. (float_of_int (i)) *. histo.(i);
-      bNumPixel := !bNumPixel +. 1.;
-    done;
-    bWeight := !bWeight /. float_of_int numPixel;
-    bMean := !bMean /. !bNumPixel;
-    for i = 0 to tresh do
-      bVariance := !bVariance +. ((((float_of_int i) -. !bMean)**2.) *. histo.(i));
-    done;
-    if (!bNumPixel = 0.) then 
-      bNumPixel := 1.;
-    bVariance := !bVariance /. !bNumPixel;
-    (* Foreground shit *)
-    let fNumPixel = ref 0.
+    and bVariance = ref 0.
+    and fNumPixel = ref 0.
     and fWeight = ref  0.
     and fMean = ref 0.
-    and fVariance = ref 0. in  
-    for i = tresh+1 to 255 do 
-      fWeight := !fWeight +. histo.(i);
-      fMean := !fMean +. float_of_int(i) *. histo.(i);
-      fNumPixel := !fNumPixel +. 1.;
-    done;
-    if (!fNumPixel = 0.) then
-      fNumPixel := 1.;
-    fWeight := !fWeight /. float_of_int numPixel;
-    fMean := !fMean /. !fNumPixel;
-    for i = tresh+1 to 255 do
-      fVariance := !fVariance +. ((((float_of_int i) -. !fMean)**2.) *. histo.(i));
-    done;
-    fVariance := !fVariance /. !fNumPixel;
-    let intraClasseVariance  = !bWeight *. !bVariance +. !fWeight *. !fVariance in
-    Printf.printf "bW : %f . bV : %f . fW : %f . fV : %f. iCV : %f" !bWeight !bVariance !fWeight !fVariance intraClasseVariance;
-    intraClasseVariance;
-    end	
-
-let minVariance histo numPixel = 
-  begin
-    let minVar = ref 255. 
-    and treshold = ref 0 in
+    and treshold = ref 0
+    and maxVariance = ref 0.
+    and currentVariance = ref 0.
+    and sum = ref 0. in
+    for i = 1 to 255 do
+      sum := !sum +. float_of_int (i * histo.(i))
+    done;    
     for i = 0 to 255 do
-      let var = variance histo i numPixel in
-      if var < !minVar then
+      bWeight := !bWeight +. float_of_int histo.(i);
+      fWeight := numPixel -. !bWeight;
+      bSum := float_of_int i *. float_of_int histo.(i);
+      bMean := !bSum /. !bWeight;
+      fMean := (!sum -. !bSum) /. !fWeight;
+      currentVariance := !bWeight *. !fWeight *. ((!bMean -. !fMean)**2.);
+      if !currentVariance > !maxVariance then
 	begin
-	  Printf.printf "%i" !treshold;
-	  minVar := var;
+	  maxVariance := !currentVariance;
 	  treshold := i;
-	end       
+	end
     done;
     !treshold;
-    end
+    end	
 
 (* binarization using Otsu's method, src must be greyscaled *)
 let binarizationOtsu src dst = 
   let (w,h) = Function.get_dims src 
   and histo = getHistogramme src in
   let numPixel = w * h in
-  let eqHisto = equalizationHisto histo numPixel in
-  let treshold = minVariance eqHisto numPixel in
-  Printf.printf "%i" treshold;
+  let treshold = otsuThreshold histo numPixel in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
       let (color,_,_) = Sdlvideo.get_pixel_color src i j in
