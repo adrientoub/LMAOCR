@@ -13,7 +13,7 @@ let deleteFirst l = match l with
 
 let getMedian l = 
   if ((List.length l mod 2) = 0) then
-    ((List.nth l (List.length l / 2)) +. 
+    ((List.nth l (List.length l / 2)) +.
     (List.nth l (List.length l / 2 - 1))) /. 2.
   else
     (List.nth l (List.length l / 2))
@@ -37,7 +37,7 @@ let getVoisins img x y rayon =
        for i = x - rayon to x + rayon do
 	 if (i >= 0 && i < w && j >= 0 && j < h) then
 	   let (r, g, b) = Sdlvideo.get_pixel_color img i j in
-	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false && 
+	   if (r = 0 && g = 0 && b = 0 && !scanned.(i).(j) = false &&
 	       (i = x && j = y) = false) then
 	     begin
 	       voisins := (!voisins)@[(initPoint i j)];
@@ -67,7 +67,7 @@ let rec scanLetter img x y =
        !point.y <- !point.y / List.length l;
        !point
 
- let distance a c =  sqrt( float_of_int ((a.x - c.x) * (a.x - c.x) 
+ let distance a c =  sqrt( float_of_int ((a.x - c.x) * (a.x - c.x)
 				       + (a.y - c.y) * (a.y - c.y) ))
 
  let getNearest l c =
@@ -78,7 +78,7 @@ let rec scanLetter img x y =
       -1 in (List.nth (List.sort predicate l) 0)
 
 (* Renvoie la distance approximative jusqu'a la prochaine lettre de la ligne *)
- let getRayon l center = 
+ let getRayon l center =
    let rayon = ref 0. in
    for i = 0 to (List.length l) - 1 do
      let distance = distance (List.nth l i) center in
@@ -101,7 +101,7 @@ let getAngle img p1 p2 =
 (* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
     let (w, h) = Function.get_dims img
-    and 
+    and
 	lastPixel = ref [] and blackPixels = ref [] and test = false and
 	i = ref 0 and j = ref 0 and finalList = ref [] and medRayon = ref [] in
     begin
@@ -133,7 +133,7 @@ let transformToPoints img output =
       	 medRayon := !medRayon@[float_of_int (getRayon letterPoints moy)];
 			     medRayon := List.sort compareTo !medRayon;
 			     let nextLetter =
-			     (getVoisins img  moy.x moy.y 
+			     (getVoisins img  moy.x moy.y
 				(int_of_float (getMedian !medRayon))) in
 			     if (List.length nextLetter > 0) then
 			       let lePlusPres = getNearest nextLetter moy in
@@ -145,14 +145,14 @@ let transformToPoints img output =
 		  done;
 		  (* Si on detecte plus d'une lettre on l'ajoute a la liste *)
 		  if (List.length !blackPixels > 1 ) then
-		      let moyFinal1 = ref (initPoint 0 0) and 
+		      let moyFinal1 = ref (initPoint 0 0) and
 			  moyFinal2 = ref (initPoint 0 0) in
 		      begin
 			(* Ajout des premiers pixels *)
 			for i = 0 to (List.length !blackPixels) / 2 - 1 do
 			  !moyFinal1.x <- !moyFinal1.x
 			  + (List.nth !blackPixels i).x;
-			  !moyFinal1.y <- !moyFinal1.y 
+			  !moyFinal1.y <- !moyFinal1.y
 			  + (List.nth !blackPixels i).y;
 			done;
 			(* Division des premiers pixels *)
@@ -166,9 +166,9 @@ let transformToPoints img output =
 			(* Ajout des seconds pixels *)
 			for i = (List.length !blackPixels) / 2
 			  to (List.length !blackPixels) - 1 do
-			  !moyFinal2.x <- !moyFinal2.x 
+			  !moyFinal2.x <- !moyFinal2.x
 			  + (List.nth !blackPixels i).x;
-			  !moyFinal2.y <- !moyFinal2.y 
+			  !moyFinal2.y <- !moyFinal2.y
 			  + (List.nth !blackPixels i).y;
 			done;
 			(* Division des seconds pixels *)
