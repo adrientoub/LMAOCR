@@ -1,22 +1,7 @@
-(*  ------------ Mandatory fonctions --------------- *)
-
-(* upper bound and lower bound x by 255. and 0. *)
-let borneFloat x =
-  if x < 0. then
-    0.
-  else if x > 255. then
-    255.
-  else 
-    x
-
-(* Get image's dimensions *)
-let get_dims img =
-  ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
-
 (* ------------------- Matrix ---------------------- *)
 
 (* type matrix composed by w = width, h = height and 2D array of color *)
-type matrix = 
+type matrix =
   {
     w : int;
     h : int;
@@ -28,7 +13,7 @@ let init width height =
   let new_matrix =
     {
        w = width;
-       h = height;       
+       h = height;
        matrix = Array.create_matrix width height (255,255,255);
     }
   in new_matrix
@@ -37,18 +22,18 @@ let init width height =
 let isInMatrix matrix x y =
   (x >= 0) && (x < matrix.w) && (y >= 0) && (y < matrix.h)
 
-(* Return the tab[x][y] color *) 
+(* Return the tab[x][y] color *)
 let get matrix x y =
     matrix.matrix.(x).(y)
     
 (* Set the tab[x][y] color *)
-let set matrix x y color =     
-    matrix.matrix.(x).(y) <- color 
+let set matrix x y color =
+    matrix.matrix.(x).(y) <- color
 
 (* Copy matrix *)
 let copy matrixToCopy =
   begin
-  let matrixCopied = init (matrixToCopy.w) (matrixToCopy.h)   in 
+  let matrixCopied = init (matrixToCopy.w) (matrixToCopy.h)   in
   for i = 0 to matrixCopied.w - 1 do
     for j = 0 to matrixCopied.h -1 do
       matrixCopied.matrix.(i).(j) <- matrixToCopy.matrix.(i).(j);
@@ -58,33 +43,33 @@ let copy matrixToCopy =
   end
 
 (* Put the img in a matrix *)
-let imgToMatrix img =  
+let imgToMatrix img =
   begin
-  let (w,h) = get_dims img in
-  let matrix = init w h in     
+  let (w,h) = Function.get_dims img in
+  let matrix = init w h in
     for i = 0 to w-1 do
       for j = 0 to h-1 do
 	matrix.matrix.(i).(j) <- Sdlvideo.get_pixel_color img i j
       done;
-    done; 
+    done;
   matrix;
   end
   
 (* Save the matrix in a image, return the image? *)
-let matrixToImg matrix dst = 
+let matrixToImg matrix dst =
   begin
-    let (w,h) = get_dims dst in
+    let (w,h) = Function.get_dims dst in
     for i = 0 to w-1 do
       for j = 0 to h-1 do
 	Sdlvideo.put_pixel_color dst i j matrix.matrix.(i).(j);
       done;
     done;
-  end  
+  end
 
 (* Return the color of the central pixel after application of the covolution matrix.
 tabPixel and tabCoeff need to have the same size and be square (3x3 * 3x3, 5x5 * 5x5, ...) *)
-let multLocal tabPixel tabCoeff = 
-  let w_tabPixel = Array.length tabPixel and h_tabPixel = Array.length tabPixel.(0) 
+let multLocal tabPixel tabCoeff =
+  let w_tabPixel = Array.length tabPixel and h_tabPixel = Array.length tabPixel.(0)
   and w_tabCoeff = Array.length tabCoeff and h_tabCoeff = Array.length tabCoeff.(0) in
   if (w_tabPixel = w_tabCoeff) && (h_tabPixel = h_tabCoeff) then
       begin
@@ -96,9 +81,9 @@ let multLocal tabPixel tabCoeff =
 	    bReslt := !bReslt +. float_of_int(tabPixel.(i).(j).(2)) *. tabCoeff.(i).(j);
 	  done;
 	done;
-	rReslt := borneFloat(!rReslt);
-	gReslt := borneFloat(!gReslt);
-	bReslt := borneFloat(!bReslt);
+	rReslt := Function.borneFloat(!rReslt);
+	gReslt := Function.borneFloat(!gReslt);
+	bReslt := Function.borneFloat(!bReslt);
 	let color = (truncate(!rReslt), truncate(!gReslt), truncate(!bReslt)) in
 	color
       end
@@ -106,9 +91,9 @@ let multLocal tabPixel tabCoeff =
     failwith "Arrays need to have the same length"
 
 (* Apply the covolution matrix to the whole source matrix *)
-let multMatrix matrix tabCoeff = 
+let multMatrix matrix tabCoeff =
   begin
-    let matrixDst = copy matrix       
+    let matrixDst = copy matrix
     and (w,h) = (matrix.w, matrix.h) in
     for i = 0 to w-1 do
       for j = 0 to h-1 do
@@ -130,5 +115,3 @@ let multMatrix matrix tabCoeff =
     done;
     matrixDst;
   end
-	
-
