@@ -1,10 +1,5 @@
 (* fichier permettant la binairisation de l'image *)
 
-(* obtient le niveau du gris dans l'image *)
-let level (r, g, b) = 
-  let rf = float_of_int r and gf = float_of_int g and bf = float_of_int b in
-(0.3 *. rf +. 0.59 *. gf +. 0.11 *. bf)/. 255.
-
 (* transforme une couleur en gris *)
 let color2grey (r, g, b) = 
   let grey = int_of_float (level (r, g, b) *. 255.) in
@@ -12,21 +7,21 @@ let color2grey (r, g, b) =
 
 (* transforme une image en niveau de gris *)
 let image2grey src dst =
-  let (w, h) = Rotate.get_dims src in 
+  let (w, h) = Rotate.get_dims src in
   for i = 0 to w-1 do
-    for j = 0 to h-1 do 
-      let color = Sdlvideo.get_pixel_color src i j in 
+    for j = 0 to h-1 do
+      let color = Sdlvideo.get_pixel_color src i j in
       Sdlvideo.put_pixel_color dst i j (color2grey color)
-    done 
+    done
   done
 
 (* passe une image en noir et blanc
 Le résultat n'est pas très joli *)
 let image2bnw src dst =
-  let (w, h) = Rotate.get_dims src in 
+  let (w, h) = Rotate.get_dims src in
   for i = 0 to w do
     for j = 0 to h do
-      let color = Sdlvideo.get_pixel_color src i j in 
+      let color = Sdlvideo.get_pixel_color src i j in
       let lvl = level color in 
       let newColor = if lvl < 0.5 then 0 else 255 in 
       Sdlvideo.put_pixel_color dst i j (newColor, newColor, newColor)
@@ -34,7 +29,7 @@ let image2bnw src dst =
   done
 
 (* binarization using average level of img's pixel as treshold *)
-let binarization src dst = 
+let binarization src dst =
   let (w,h) = Rotate.get_dims src in
   let greyImage = Sdlvideo.create_RGB_surface_format src [] w h in
   image2grey src greyImage;
@@ -43,7 +38,7 @@ let binarization src dst =
   Filters.applyRelaxedFilterMedianGrey greyImage filteredImage;
   for x=0 to w-1 do
     for y=0 to h-1 do
-      let (color,_,_) = Sdlvideo.get_pixel_color filteredImage x y in 
+      let (color,_,_) = Sdlvideo.get_pixel_color filteredImage x y in
       v := !v + color;
     done;
   done;
@@ -60,8 +55,8 @@ let binarization src dst =
 
 (* ------------------ Otsu stuff ------------------ *)
 
-(* histo *) 
-let getHistogramme img = 
+(* histo *)
+let getHistogramme img =
   begin
     let (w,h) = Function.get_dims img
     and histo = Array.init 256 (fun x -> 0) in
@@ -76,9 +71,9 @@ let getHistogramme img =
 
 (* Calcule the within class variance for a given pixel in a equalized histogramme *)
 let otsuThreshold histo numPixel =
-  begin    
+  begin
     let bSum = ref 0.
-    and bWeight = ref 0. 
+    and bWeight = ref 0.
     and bMean = ref 0.
     and fWeight = ref  0.
     and fMean = ref 0.
@@ -110,18 +105,18 @@ let otsuThreshold histo numPixel =
                   treshold := !i;
 		  treshold2 := !i;
                 end;
-              if !currentVariance = !maxVariance then 
+              if !currentVariance = !maxVariance then
 		treshold2 := !i;
-            end; 
+            end;
         end;
           i := !i +1;
     done;
     ((!treshold + !treshold2) / 2)
-    end    
-    
+    end
+
 (* binarization using Otsu's method, src must be greyscaled *)
-let binarizationOtsu src dst = 
-  let (w,h) = Function.get_dims src 
+let binarizationOtsu src dst =
+  let (w,h) = Function.get_dims src
   and histo = getHistogramme src in
   let nbVal = ref 0 in
   for i=0 to 255 do
@@ -138,7 +133,7 @@ let binarizationOtsu src dst =
 	Sdlvideo.put_pixel_color dst i j (255,255,255)
     done
   done
-  
+
   (* -------------- Opening ----------- *)
 
 let toBit img =
@@ -152,7 +147,7 @@ let toBit img =
 	imgBit.(i).(j) <- 1
     done;
   done;
-  imgBit;  
+  imgBit;
   end
 
 let bitToImg imgBit dst =
@@ -172,48 +167,49 @@ end
 let dilTab = Array.create_matrix 3 3 1
 
 (* Only 3*3 for now *)
-let dilatation imgBit dilTab = 
-  let w = Array.length imgBit and h = Array.length imgBit.(0)  
+let dilatation imgBit dilTab =
+  let w = Array.length imgBit and h = Array.length imgBit.(0)
  (* and wTab = Array.length dilTab and hTab = Array.length dilTab.(0) *)
   and statut = ref 0 in
   for i = 0 to w - 1 do
-    for j = 0 to h - 1 do      
+    for j = 0 to h - 1 do
       for i2 = i - 1 to i + 1 do
 	for j2 = j - 1 to j + 1 do
-	  if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then 
+	  if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then
 	    statut := !statut lor (imgBit.(i2).(j2) land dilTab.(i2 + 1).(j2 + 1));
         done;
       done;
-      imgBit.(i).(j) <- !statut; 
+      imgBit.(i).(j) <- !statut;
     done
   done
-      
+
 
 (* Erosion *)
 let eroTab = Array.create_matrix 3 3 0
 
 (* Only 3*3 for now *)
-let erosion imgBit eroTab = 
-  let w = Array.length imgBit and h = Array.length imgBit.(0)  
+let erosion imgBit eroTab =
+  let w = Array.length imgBit and h = Array.length imgBit.(0)
   (* and wTab = Array.length eroTab and hTab = Array.length eroTab.(0) *)
   and statut = ref 1 in
   for i = 0 to w - 1 do
-    for j = 0 to h - 1 do      
+    for j = 0 to h - 1 do
       for i2 = i - 1 to i + 1 do
 	for j2 = j - 1 to j + 1 do
-	   if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then 
-	     statut := !statut land ((lnot imgBit.(i2).(j2)) land (lnot eroTab.(i2 + 1).(j2 + 1)));
+	   if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then
+	     statut := !statut land ((lnot imgBit.(i2).(j2)) land
+					(lnot eroTab.(i2 + 1).(j2 + 1)));
         done;
       done;
-      imgBit.(i).(j) <- lnot !statut; 
+      imgBit.(i).(j) <- lnot !statut;
     done
   done
 
 (* Opening *)
 let opening src dst =
-  begin 
+  begin
     Printf.printf "loading";
-    let imgBit = toBit src in 
+    let imgBit = toBit src in
     Printf.printf "loaded";
     erosion imgBit eroTab;
     Printf.printf "erosion";
@@ -221,5 +217,3 @@ let opening src dst =
     Printf.printf "dila";
     bitToImg imgBit dst;
   end
-	
-	
