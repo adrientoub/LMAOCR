@@ -7,12 +7,6 @@ type point =
   mutable y: int;
 }
 
-type pixel = 
-{
-  mutable p: point;
-  mutable r: float array;
-}
-
 (* Get dimensions (width, heigth) of an image *)
 let get_dims img =
   ((Sdlvideo.surface_info img).Sdlvideo.w, (Sdlvideo.surface_info img).Sdlvideo.h)
@@ -39,15 +33,6 @@ let initPoint x0 y0 =
     y = y0;
   }
 
-let initPixel x0 y0  = 
-begin
-  let p = { p = { x = x0; y = y0 }; r = Array.init 360 (function n -> 0.)} in 
-  let xf = float_of_int p.p.x and yf = float_of_int p.p.y in
-     for i = 0 to 359 do
-      p.r.(i) <- xf *. cos (float_of_int i *. pi /. 180.) +. yf *. sin (float_of_int i *. pi /. 180. )
-     done; p
-end
-
 (* Renvoie les pixels noirs non scannés dans un rayon de [rayon] *)
 let getVoisins img x y rayon =
     let (w, h) = get_dims img and voisins = ref [] in
@@ -64,14 +49,14 @@ let getVoisins img x y rayon =
     !voisins
 
 (* Renvoie tous les pixels noirs liés au point [i] [j] *)
- let rec scanLetter img x y =
-   !scanned.(x).(y) <- true;
-    let voisins = ref (getVoisins img x y 1) and result = ref [] in
-    for i = 0 to List.length !voisins - 1 do
-      result := (!result)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
-    done;
-    result := (!result)@[(initPoint x y)];
-    !result
+let rec scanLetter img x y =
+  !scanned.(x).(y) <- true;
+  let voisins = ref (getVoisins img x y 1) and result = ref [] in
+  for i = 0 to List.length !voisins - 1 do
+    result := (!result)@(scanLetter img (List.nth !voisins i).x (List.nth !voisins i).y)
+  done;
+  result := (!result)@[(initPoint x y)];
+  !result
 
  let getMiddlePoint l = 
    let point = ref (initPoint 0 0) in
@@ -116,10 +101,11 @@ let getAngle img p1 p2 =
 let transformToPoints img output =
     let (w, h) = get_dims img
     and 
-	lastPixel = ref [] and pixelsNoirs = ref [] and test = 15 and
+	lastPixel = ref [] and blackPixels = ref [] and test = false and
 	i = ref 0 and j = ref 0 and finalList = ref [] and medRayon = ref [] in
     begin
       Rotate.toWhite output;
+      Sdlvideo.save_BMP img "bin.bmp";
       (* Initialise le tableau de scan *)
       scanned := (Array.create_matrix w h false);
 (*  Detecte le premier pixel noir et le stock dans lastPixel *)
@@ -129,88 +115,70 @@ let transformToPoints img output =
 	  if r = 0 && g = 0 && b = 0 && !scanned.(!i).(!j) = false then
 		begin
 		  lastPixel := (initPoint !i !j)::(!lastPixel);
-		  (*Rotate.toWhite output;*)
+		  if (test) then
+		    Rotate.toWhite output;
 		  (* Tant que l'on rencontre une lettre *)
 		  while List.length !lastPixel > 0 do
 		    (* Detecte la lettre et dessine un point au centre de celle ci *)
-		    let pointsDeLaLettre = (scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y)
-		    in let moy = (getMiddlePoint pointsDeLaLettre) in
+		    let letterPoints = (scanLetter img (List.nth !lastPixel 0).x (List.nth !lastPixel 0).y)
+		    in let moy = (getMiddlePoint letterPoints) in
 		       begin
-			 if (List.length pointsDeLaLettre > 1) then
+			 if (List.length letterPoints > 20) then
 			   begin
-			     pixelsNoirs := moy::(!pixelsNoirs);
-			     (*if (List.length !finalList < 50) then
-			       Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);*)
-			     medRayon := !medRayon@[float_of_int (getRayon pointsDeLaLettre moy)];
+			     blackPixels := moy::(!blackPixels);
+			     if (test && List.length !finalList < 50) then
+			       Sdlvideo.put_pixel_color output moy.x moy.y (0,0,0);
+			     medRayon := !medRayon@[float_of_int (getRayon letterPoints moy)];
 			     medRayon := List.sort compareTo !medRayon;
 			     let nextLetter = (getVoisins img  moy.x moy.y (int_of_float (getMedian !medRayon))) in
 			     if (List.length nextLetter > 0) then
 			       let lePlusPres = getNearest nextLetter moy in
 			       lastPixel := (!lastPixel)@[lePlusPres];
-			     else (* si on a pas toruvé de ovisin *)
-			       begin
-				 ();
-			       end;
-			       
-			   end
-			 else
-			   begin
 			   end;
 
 			 lastPixel := deleteFirst !lastPixel;
 		       end;
 		  done;
-		  if (List.length !pixelsNoirs > 1 && List.length !pixelsNoirs < 15 ) then
+		  (* Si on a detecte plus d'une lettre on l'ajoute a la liste *)
+		  if (List.length !blackPixels > 1 ) then
 		    begin
-		      (* Test *)
-		      if (List.length !finalList = test) then
-			begin
-			  print_int (List.length !pixelsNoirs);
-			  Printf.printf " lettres trouvés et remplacés par des points.\n";
-			end;
-
 		      let moyFinal1 = ref (initPoint 0 0) and moyFinal2 = ref (initPoint 0 0) in
 		      begin
 			(* Ajout des premiers pixels *)
-			for i = 0 to (List.length !pixelsNoirs) / 2 - 1 do
-			  !moyFinal1.x <- !moyFinal1.x + (List.nth !pixelsNoirs i).x;
-			  !moyFinal1.y <- !moyFinal1.y + (List.nth !pixelsNoirs i).y;
+			for i = 0 to (List.length !blackPixels) / 2 - 1 do
+			  !moyFinal1.x <- !moyFinal1.x + (List.nth !blackPixels i).x;
+			  !moyFinal1.y <- !moyFinal1.y + (List.nth !blackPixels i).y;
 			done;
 			(* Division des premiers pixels *)
-			if (List.length !pixelsNoirs / 2) > 0 then
+			if (List.length !blackPixels / 2) > 0 then
 			  begin
-			    !moyFinal1.x <- !moyFinal1.x / ( (List.length !pixelsNoirs) / 2);
-			    !moyFinal1.y <- !moyFinal1.y / ( (List.length !pixelsNoirs) / 2);
+			    !moyFinal1.x <- !moyFinal1.x / ( (List.length !blackPixels) / 2);
+			    !moyFinal1.y <- !moyFinal1.y / ( (List.length !blackPixels) / 2);
 			  end;
 			(* Ajout des seconds pixels *)
-			for i = (List.length !pixelsNoirs) / 2 to (List.length !pixelsNoirs) - 1 do
-			  !moyFinal2.x <- !moyFinal2.x + (List.nth !pixelsNoirs i).x;
-			  !moyFinal2.y <- !moyFinal2.y + (List.nth !pixelsNoirs i).y;
+			for i = (List.length !blackPixels) / 2 to (List.length !blackPixels) - 1 do
+			  !moyFinal2.x <- !moyFinal2.x + (List.nth !blackPixels i).x;
+			  !moyFinal2.y <- !moyFinal2.y + (List.nth !blackPixels i).y;
 			done;
 			(* Division des seconds pixels *)
-			if (List.length !pixelsNoirs - List.length !pixelsNoirs / 2) > 0 then
+			if (List.length !blackPixels - List.length !blackPixels / 2) > 0 then
 			  begin
-			    !moyFinal2.x <- !moyFinal2.x / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
-			    !moyFinal2.y <- !moyFinal2.y / (List.length !pixelsNoirs - List.length !pixelsNoirs / 2);
-			  end;
-			
-			(* Si on a detecte plus d'une lettre on l'ajoute a la liste *)
-			if(List.length !pixelsNoirs > 1) then
-			  begin
-			    let angle = getAngle img !moyFinal1 !moyFinal2 in
-			    finalList := angle::(!finalList);
-			    (*(* Test *)
-			    if (List.length !finalList < 20) then
-			      begin
-				Printf.printf "Angle de la ligne %i: %s\n" (List.length !finalList - 1) (string_of_float angle);
-				Sdlvideo.save_BMP output ("rendu/rendu" ^ (string_of_int (List.length !finalList - 1)) ^ ".bmp");
-			      end;*)
+			    !moyFinal2.x <- !moyFinal2.x / (List.length !blackPixels - List.length !blackPixels / 2);
+			    !moyFinal2.y <- !moyFinal2.y / (List.length !blackPixels - List.length !blackPixels / 2);
 			  end;
 
+			let angle = getAngle img !moyFinal1 !moyFinal2 in
+			finalList := angle::(!finalList);
+			(* Test *)
+			if (test && List.length !finalList < 20) then
+			  begin
+			    Printf.printf "Angle de la ligne %i: %f\n" (List.length !finalList - 1) angle;
+			    Sdlvideo.save_BMP output ("rendu/rendu" ^ (string_of_int (List.length !finalList - 1)) ^ ".bmp");
+			  end;
 		      end
 		    end;
 		end;
-	  pixelsNoirs := [];
+	  blackPixels := [];
 	  lastPixel := [];
 	  i := !i + 1;
 	done;
