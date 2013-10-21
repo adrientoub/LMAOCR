@@ -2,7 +2,7 @@
 
 (* transforme une couleur en gris *)
 let color2grey (r, g, b) = 
-  let grey = int_of_float (level (r, g, b) *. 255.) in
+  let grey = int_of_float (Function.level (r, g, b) *. 255.) in
   (grey, grey, grey)
 
 (* transforme une image en niveau de gris *)
@@ -22,7 +22,7 @@ let image2bnw src dst =
   for i = 0 to w do
     for j = 0 to h do
       let color = Sdlvideo.get_pixel_color src i j in
-      let lvl = level color in 
+      let lvl = Function.level color in 
       let newColor = if lvl < 0.5 then 0 else 255 in 
       Sdlvideo.put_pixel_color dst i j (newColor, newColor, newColor)
     done 
