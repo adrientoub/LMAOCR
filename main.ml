@@ -1,5 +1,6 @@
 (* 
-Ce programme est un OCR développé par l'équipe HipsterEgg dans le cadre d'un projet de deuxième année à l'EPITA
+Ce programme est un OCR développé par l'équipe HipsterEgg
+dans le cadre d'un projet de deuxième année à l'EPITA
 *)
  
 (* initialisation de SDL *)
@@ -18,27 +19,27 @@ let rec wait_key () =
  
 (*
   show img dst
-  affiche la surface img sur la surface de destination dst (normalement l'écran)
+  affiche la surface img sur la surface de destination dst
 *)
 let show img dst =
   let d = Sdlvideo.display_format img in
     Sdlvideo.blit_surface d dst ();
     Sdlvideo.flip dst
 
-let showHelp () = 
+let showHelp () =
   Printf.printf "Pour lancer l'ocr utilisez les paramètres suivants : \n
 --help : afficher l'aide
 -help  : afficher l'aide
 ./lmaocr [nom du fichier] : lancer l'ocr avec l'image en paramètre
-./lmaocr [nom du fichier] [angle] : lancer l'ocr avec l'angle défini en paramètre
-./lmaocr [nom du fichier] [-o [sauvegarde]] : sauvegarde le rendu dans l'image sauvegarde\n";
+./lmaocr [nom du fichier] [angle] : lance l'ocr avec l'angle défini en paramètre
+./lmaocr [nom du fichier] [-o [sauvegarde]] : save the image \n";
   exit 0
 
-let saveImage finalImage = 
+let saveImage finalImage =
   let length = Array.length (Sys.argv) in
   for i = 3 to length-1 do
-    if (compare Sys.argv.(i) "-o") = 0 then 
-      if (length >= i+1) then 
+    if (compare Sys.argv.(i) "-o") = 0 then
+      if (length >= i+1) then
 	  Sdlvideo.save_BMP finalImage Sys.argv.(i+1);
  done
  
@@ -47,14 +48,15 @@ let saveImage finalImage =
 let main () =
   begin
     (* Get image file name *)
-    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
+    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0)
+      || ((compare Sys.argv.(1) "-help") = 0) then
       showHelp ();
 
     (* get the rotation's angle *)
     let angle = ref (
-    if Array.length (Sys.argv) >= 3 then 
+    if Array.length (Sys.argv) >= 3 then
       float_of_string (Sys.argv.(2))
-    else 
+    else
       0.) in
 
     (* Initialisation of SDL *)
@@ -69,20 +71,22 @@ let main () =
     (* Apply filter against noise (currently a relaxed median filter) *)
     Printf.printf "Applying anti-noise filters\n";
     let (w,h) = Function.get_dims src in
-    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in      
+    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
     Filters.applyRelaxedFilterMedianGrey src filteredImage;
     Printf.printf "Anti-noise filters applied\n";
-    
+
     (* Make a copy of the filtered image for the rotation *)
-    let filteredImageCopy = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    let filteredImageCopy =
+      Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     Function.copyImg filteredImage filteredImageCopy;
-    
-    (* Binarize the filtered image using Ostu's method for setting the threshold *)
+
+    (*Binarize the filtered image using Ostu method for setting the threshold*)
     Printf.printf "Binarization...\n";
-    let binarizedImage = Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    let binarizedImage =
+      Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     Binarization.binarizationOtsu filteredImage binarizedImage;
     Printf.printf "Binarization done\n";
-      
+
     (* Detect the angle using Hough transform *)
     Printf.printf "Angle detecting...\n";
     let points = Sdlvideo.create_RGB_surface_format binarizedImage [] w h in
@@ -90,23 +94,24 @@ let main () =
       angle := Angle.transformToPoints binarizedImage points;
     Printf.printf "Angle found! %f\n" !angle;
     end;
-   
-    (* Rotation using Bilinear interpolation after the rotation is done *)  
+
+    (* Rotation using Bilinear interpolation after the rotation is done *)
     Printf.printf "Rotating...\n";
     let rotatedImage = Sdlvideo.create_RGB_surface_format filteredImageCopy [] w h in
     Function.toWhite rotatedImage;
     Rotate.rotateWeighted filteredImageCopy rotatedImage !angle;
     Printf.printf "Rotation done\n";
-    
-    
+
+
     (* Binarize the rotated image (again using Otsu's method) *)
-    let pretreatedImage = Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
+    let pretreatedImage =
+      Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarizationOtsu rotatedImage pretreatedImage;
- 
-    Printf.printf "Pretreatement done\n";    
-        
+
+    Printf.printf "Pretreatement done\n";
+
     (* Create the display surface in doublebuffering with the image size *)
-    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in  
+    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     show pretreatedImage display;
     wait_key ();
     Extract.trace_lines pretreatedImage;
