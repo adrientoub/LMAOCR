@@ -104,9 +104,10 @@ let main () =
     let pretreatedImage = Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarizationOtsu rotatedImage pretreatedImage;
 
-    (*Extract.trace_lines_column pretreatedImage;
+ 
     Extract.trace_lines pretreatedImage;
-    Extract.extract_lines pretreatedImage;
+    Extract.trace_lines_column pretreatedImage;
+    (*Extract.extract_lines pretreatedImage;
     Extract.extract_lines_column pretreatedImage;*)
  
     Printf.printf "Pretreatement done bitches\n";    

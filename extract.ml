@@ -6,7 +6,7 @@ let test_empty_line img h =
       true
     else
       match Sdlvideo.get_pixel_color img w h with
-        | (x,_,_) when x > 127 -> f img h (w+1) cpt
+        | (x,_,_) when x >= 127 -> f img h (w+1) cpt
         | _ -> if cpt = 4 then false else f img h (w+1) (cpt+1)
   in f img h 0 0
 		
@@ -18,7 +18,7 @@ let test_empty_column img w =
       true
     else 
       match Sdlvideo.get_pixel_color img w h with
-        | (x,_,_) when x > 127 -> f img (h+1) w cpt
+        | (x,_,_) when x >= 127 -> f img (h+1) w cpt
         | _ -> if cpt = 7 then false else f img (h+1) w (cpt+1)
   in f img 0 w 0
 		
@@ -61,8 +61,7 @@ let trace_lines img =
   for h = 0 to height - 1 do
     if test_empty_line img h then
       set_grey_line img h
-  done;
-  img
+  done
     
 (* Detects the empty columns and replace them by grey color *)    
 let trace_lines_column img =
@@ -70,8 +69,7 @@ let trace_lines_column img =
   for w = 0 to width - 1 do
     if test_empty_column img w then
       set_grey_column img w
-  done;
-  img
+  done
 
 (* let trace_lines_column2 beg en img =
         for w = 0 to img.Image.w - 1 do
