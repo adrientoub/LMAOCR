@@ -100,6 +100,8 @@ let getAngle img p1 p2 =
 
 (* Transforme chaque lettre de la premiere ligne en point centré, pour pouvoir ensuite calculer l'angle *)
 let transformToPoints img output =
+try
+  begin
     let (w, h) = Function.get_dims img
     and
 	lastPixel = ref [] and blackPixels = ref [] and test = false and
@@ -209,3 +211,6 @@ let transformToPoints img output =
       Printf.printf "Nombre de lignes : %i\n" (List.length !finalList);
       angle
     end;
+  end;
+with
+  _->failwith "Error : Black picture"
