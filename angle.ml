@@ -107,7 +107,7 @@ try
 	lastPixel = ref [] and blackPixels = ref [] and test = false and
 	i = ref 0 and j = ref 0 and finalList = ref [] and medRayon = ref [] in
     begin
-      Rotate.toWhite output;
+      Function.toWhite output;
       Sdlvideo.save_BMP img "bin.bmp";
       (* Initialise le tableau de scan *)
       scanned := (Array.create_matrix w h false);
@@ -119,7 +119,7 @@ try
 		begin
 		  lastPixel := (initPoint !i !j)::(!lastPixel);
 		  if (test) then
-		    Rotate.toWhite output;
+		    Function.toWhite output;
 		  (* Tant que l'on rencontre une lettre *)
 		  while List.length !lastPixel > 0 do
 		    (* Detecte la lettre et dessine un point au centre *)

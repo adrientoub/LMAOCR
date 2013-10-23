@@ -24,7 +24,7 @@ let getPlaceArray tab x =
 let getRelaxedMedianArrayGrey tab cp =
   let median = getMedianArray tab
   and posX = getPlaceArray tab cp in
-  if (posX > median) && (posX < median + 1) then
+  if (posX > median - 1) && (posX < median + 1) then
     tab.(posX)
   else
     tab.(median)

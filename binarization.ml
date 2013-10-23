@@ -7,7 +7,7 @@ let color2grey (r, g, b) =
 
 (* transforme une image en niveau de gris *)
 let image2grey src dst =
-  let (w, h) = Rotate.get_dims src in
+  let (w, h) = Function.get_dims src in
   for i = 0 to w-1 do
     for j = 0 to h-1 do
       let color = Sdlvideo.get_pixel_color src i j in
@@ -18,7 +18,7 @@ let image2grey src dst =
 (* passe une image en noir et blanc
 Le résultat n'est pas très joli *)
 let image2bnw src dst =
-  let (w, h) = Rotate.get_dims src in
+  let (w, h) = Function.get_dims src in
   for i = 0 to w do
     for j = 0 to h do
       let color = Sdlvideo.get_pixel_color src i j in
@@ -30,7 +30,7 @@ let image2bnw src dst =
 
 (* binarization using average level of img's pixel as treshold *)
 let binarization src dst =
-  let (w,h) = Rotate.get_dims src in
+  let (w,h) = Function.get_dims src in
   let greyImage = Sdlvideo.create_RGB_surface_format src [] w h in
   image2grey src greyImage;
   let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in

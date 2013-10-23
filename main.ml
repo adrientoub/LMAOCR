@@ -71,13 +71,23 @@ let main () =
     (* Apply filter against noise (currently a relaxed median filter) *)
     Printf.printf "Applying anti-noise filters\n";
     let (w,h) = Function.get_dims src in
+    (*
+    let filteredImageTemp = Sdlvideo.create_RGB_surface_format src [] w h in
+    Filters.applyPasseHautFilter src filteredImageTemp; *)
     let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
     Filters.applyRelaxedFilterMedianGrey src filteredImage;
+
+    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
+
+    show src display;
+    wait_key ();
+
+    (* Filters.applyPasseBasFilter filteredImageTemp filteredImage; *)
     Printf.printf "Anti-noise filters applied\n";
 
     (* Make a copy of the filtered image for the rotation *)
     let filteredImageCopy =
-      Sdlvideo.create_RGB_surface_format filteredImage [] w h in
+    Sdlvideo.create_RGB_surface_format filteredImage [] w h in
     Function.copyImg filteredImage filteredImageCopy;
 
     (*Binarize the filtered image using Ostu method for setting the threshold*)
@@ -87,6 +97,8 @@ let main () =
     Binarization.binarizationOtsu filteredImage binarizedImage;
     Printf.printf "Binarization done\n";
 
+    show binarizedImage display;
+    wait_key ();
     (* Detect the angle using Hough transform *)
     Printf.printf "Angle detecting...\n";
     let points = Sdlvideo.create_RGB_surface_format binarizedImage [] w h in
@@ -102,6 +114,8 @@ let main () =
     Rotate.rotateWeighted filteredImageCopy rotatedImage !angle;
     Printf.printf "Rotation done\n";
 
+    show rotatedImage display;
+    wait_key ();
 
     (* Binarize the rotated image (again using Otsu's method) *)
     let pretreatedImage =
@@ -111,7 +125,8 @@ let main () =
     Printf.printf "Pretreatement done\n";
 
     (* Create the display surface in doublebuffering with the image size *)
-    let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
+
+
     show pretreatedImage display;
     wait_key ();
     Extract.trace_lines pretreatedImage;
