@@ -64,5 +64,7 @@ let copyImg img dst =
 	Sdlvideo.put_pixel_color dst i j (Sdlvideo.get_pixel_color img i j)
     done
   done
- 
+
+let float_of_color (color, _, _) = 
+  float_of_int color 
 

@@ -60,7 +60,7 @@ let main () =
       if (Array.length (Sys.argv) > 2) then
 	(Sys.argv.(2))
       else
-	"none") in	    
+	"") in	    
 
     (* Initialisation of SDL *)
     Printf.printf "Initialisation\n%!";
@@ -75,8 +75,18 @@ let main () =
 
     (* Apply filter against noise (currently a relaxed median filter) *)
     Printf.printf "Applying anti-noise filters\n%!"; 
-    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in   
-    Filters.applyRelaxedFilterMedianGrey src filteredImage; 
+    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
+      if (!filter = "m") then
+	begin
+	  Filters.applyRelaxedFilterMedianGrey src filteredImage;
+	end
+      else if (!filter = "c") then
+	begin
+	  Filters.applyPasseHautFilter src filteredImage;
+	end
+      else
+	Function.copyImg src filteredImage;
+
     
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     show src display;

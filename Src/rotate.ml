@@ -29,10 +29,12 @@ let getWeightedColor matrix decX decY srcX srcY =
   let xmore = if T_matrix.isInMatrix matrix (srcX - 1) srcY then srcX - 1 else srcX 
   and ymore = if T_matrix.isInMatrix matrix srcX (srcY - 1) then srcY - 1 else srcY in 
   let initColor = 
-       (1. -. decX) *. (1. -. decY) *. Function.level (T_matrix.get matrix srcX srcY)
-    +. decX *. (1. -. decY) *. Function.level (T_matrix.get matrix xmore srcY)
-    +. (1. -. decX) *. decY *. Function.level (T_matrix.get matrix srcX ymore)
-    +. decX *. decY *. Function.level (T_matrix.get matrix xmore ymore) in initColor
+    let c00 = (1. -. decX) *. (1. -. decY) *. Function.level (T_matrix.get matrix srcX srcY)
+    and c01 = decX *. (1. -. decY) *. Function.level (T_matrix.get matrix xmore srcY)
+    and c10 = (1. -. decX) *. decY *. Function.level (T_matrix.get matrix srcX ymore)
+    and c11 = decX *. decY *. Function.level (T_matrix.get matrix xmore ymore) in
+    c00 +. c01 +. c10 +. c11
+  in initColor
   
 (* Weighted rotation *)
 let rotateWeighted img dst angDegre =  
@@ -44,6 +46,7 @@ let rotateWeighted img dst angDegre =
   and cosAng = cos(ang) and sinAng = sin(ang) in     
   for i = 0 to w-1 do
     for j = 0 to h-1 do         
+      
     (*  if (T_matrix.get imgMatrix i j) = (0,0,0) then *)
 	let srcX = initX i j cosAng sinAng ((w-1)/2) ((h-1)/2)
 	and srcY = initY i j cosAng sinAng ((w-1)/2) ((h-1)/2)   in
