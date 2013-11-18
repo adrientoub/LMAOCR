@@ -8,6 +8,6 @@ tpsdl: main.ml
 	${OCAML} ${OCAMLFLAGS} ${OCAMLLD} -o lmaocr function.ml t_matrix.ml rotate.ml filters.ml angle.ml binarization.ml extract.ml main.ml 
  
 clean::
-	rm -f *~ *.o *.cm? lmaocr
+	rm -f *~ *.o *.core *.cm? lmaocr
  
 # FIN
