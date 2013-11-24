@@ -137,8 +137,7 @@ let main () =
 
     show pretreatedImage display;
     wait_key ();
-    Extract.trace_lines pretreatedImage;
-    Extract.trace_lines_column pretreatedImage;
+    Extract.charDetection pretreatedImage;
     show pretreatedImage display;
     saveImage pretreatedImage;
     (* on attend une touche *)
