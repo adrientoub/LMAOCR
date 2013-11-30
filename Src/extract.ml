@@ -1,3 +1,5 @@
+let scanned2 = ref (Array.create_matrix 1 1 false) (* Tableau qui contient les pixels scannés *)
+
 (* Tests if a line only has white pixels *)
 let test_empty_line img h w0 wmax =
   let rec f img h w  =
@@ -6,7 +8,7 @@ let test_empty_line img h w0 wmax =
     else
       match Sdlvideo.get_pixel_color img w h with
         | (x,_,_) when x >= 127 -> f img h (w+1) (* SI c'est du blanc ou du gris on relance *)
-        | _ -> false (* SInon on est tombé sur une lettre, donc la ligne n'est pas vide *)
+        | _ -> false (* Sinon on est tombé sur une lettre, donc la ligne n'est pas vide *)
   in f img h w0
 		
 (* Tests if a column only has white pixels *)
@@ -49,9 +51,9 @@ let trace_lines_column img h0 hmax =
   done
 
 let findWhite img = 
-  let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 and found = ref false in
-  while !j < height && !found = false do
-    while !i < width && !found = false do
+  let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 and compteur = ref 0 and nbitemax = 30 in
+  while !j < height && !compteur < nbitemax do
+    while !i < width && !compteur < nbitemax do
       let (r,g,b) = Sdlvideo.get_pixel_color img !i !j in
       if (r = 255 && g = 255 && b = 255) then
 	begin
@@ -63,11 +65,18 @@ let findWhite img =
 	  while (!y < height && Sdlvideo.get_pixel_color img !i !y = (255,255,255)) do
 	    y := !y + 1;
 	  done;
+	  (*for ni = !i to (!x-1) do
+	    for nj = !j to (!y-1) do
+	      !scanned2.(!i).(!j) <- true;
+	      Printf.printf "Cherjiojiojition...\n%!";
+	    done;
+	  done;*)
 	  trace_lines img !i !x;
 	  trace_lines_column img !j !y;
+	  (* Printf.printf "Position : %i %i w,h : %i %i\n" !i !j !x !y; *)
 	  i := !x;
 	  j := !y;
-	  (* Printf.printf "Position : %i %i w,h : %i %i\n" !i !j !x !y; *)
+	  compteur := !compteur + 1;
 	end;
       i := !i + 1;
     done;
@@ -79,4 +88,5 @@ let charDetection img =
     let (width, height) = Function.get_dims img in
     trace_lines img 0 (width-1);
     trace_lines_column img 0 (height-1);
+    scanned2 := Array.create_matrix width height false;
     findWhite img
