@@ -126,11 +126,12 @@ let main () =
     wait_key ();
 
     (* Binarize the rotated image (again using Otsu's method) *)
+    Printf.printf "Character detection...\n%!";
     let pretreatedImage =
       Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarizationOtsu rotatedImage pretreatedImage;
 
-    Printf.printf "Pretreatement done\n%!";
+    Printf.printf "Character detection done\n%!";
 
     (* Create the display surface in doublebuffering with the image size *)
 
@@ -140,6 +141,7 @@ let main () =
     Extract.charDetection pretreatedImage;
     show pretreatedImage display;
     saveImage pretreatedImage;
+    Printf.printf "Pretreatement done\n%!";
     (* on attend une touche *)
     wait_key ();
     (* on quitte *)
