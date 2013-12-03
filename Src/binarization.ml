@@ -16,7 +16,7 @@ let image2grey src dst =
   done
 
 (* passe une image en noir et blanc
-Le résultat n'est pas très joli *)
+Le rÃ©sultat n'est pas trÃ¨s joli *)
 let image2bnw src dst =
   let (w, h) = Function.get_dims src in
   for i = 0 to w do
@@ -139,12 +139,15 @@ let binarizationOtsu src dst =
 let toBit img =
   begin
   let (w,h) = Function.get_dims img in
-  let imgBit = Array.create_matrix w h 0 in
+  let imgBit = Array.create_matrix w h false in
   for i = 0 to w - 1 do
     for j = 0 to h - 1 do
       let (color,_,_) = Sdlvideo.get_pixel_color img i j in
       if color = 0 then
-	imgBit.(i).(j) <- 1
+	begin
+	  Printf.printf "black here : %i %i \n %!" i j;
+	  imgBit.(i).(j) <- true;
+	end
     done;
   done;
   imgBit;
@@ -155,7 +158,7 @@ let bitToImg imgBit dst =
     let (w,h) = (Array.length imgBit, Array.length imgBit.(0)) in
     for i = 0 to w - 1 do
       for j = 0 to h - 1 do
-	if imgBit.(i).(j) = 1 then
+	if imgBit.(i).(j) then
 	  Sdlvideo.put_pixel_color dst i j (0,0,0)
 	else
 	  Sdlvideo.put_pixel_color dst i j (255,255,255)
@@ -164,25 +167,29 @@ let bitToImg imgBit dst =
 end
 
 (* Dilatation *)
-let dilTab = Array.create_matrix 3 3 1
+let dilTab = Array.create_matrix 3 3 true
 
 (* Only 3*3 for now *)
 let dilatation imgBit dilTab =
-  let w = Array.length imgBit and h = Array.length imgBit.(0)
- (* and wTab = Array.length dilTab and hTab = Array.length dilTab.(0) *)
-  and statut = ref 0 in
-  for i = 0 to w - 1 do
-    for j = 0 to h - 1 do
-      for i2 = i - 1 to i + 1 do
-	for j2 = j - 1 to j + 1 do
-	  if (i2 >= 0) && (j2 >= 0) && (i2 < 1) && (j2 < 1) then
-	    statut := !statut lor (imgBit.(i2).(j2) land dilTab.(i2 + 1).(j2 + 1));
-        done;
-      done;
-      imgBit.(i).(j) <- !statut;
-    done
-  done
-
+  begin
+    let (w,h) = (Array.length imgBit, Array.length imgBit.(0))      
+    and statut = ref false in 
+    for i = 0 to w - 1 do
+      for j = 0 to h - 1 do
+	for i2 = i - 1 to i + 1 do
+	  for j2 = j - 1 to j + 1 do
+	    if (i2 >= 0) && (j2 >= 0) && (i2 < w - 1) && (j2 < h - 1) then
+	      begin
+		Printf.printf "statut = %B, dilTab.(%i).(%i) = %B, imgBit.(%i).(%i) = %B \n %!" (!statut) (i - i2 + 1) (j - j2 + 1) (dilTab.(i - i2 + 1).(j - j2 + 1)) i2 j2 (imgBit.(i2).(j2));
+		Function.wait_key ();
+		statut := !statut || (dilTab.(i - i2 + 1).(j - j2 + 1) && imgBit.(i2).(j2));
+	      end
+	  done;
+	done;
+	imgBit.(i).(j) <- !statut
+      done
+    done  
+  end
 
 (* Erosion *)
 let eroTab = Array.create_matrix 3 3 0
@@ -208,11 +215,11 @@ let erosion imgBit eroTab =
 (* Opening *)
 let opening src dst =
   begin
-    Printf.printf "loading";
+    Printf.printf "loading \n";
     let imgBit = toBit src in
-    Printf.printf "loaded";
-    erosion imgBit eroTab;
-    Printf.printf "erosion";
+    Printf.printf "loaded \n";
+   (* erosion imgBit eroTab;
+    Printf.printf "erosion";*)
     dilatation imgBit dilTab;
     Printf.printf "dila";
     bitToImg imgBit dst;
