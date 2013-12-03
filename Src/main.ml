@@ -9,14 +9,7 @@ let sdl_init () =
     Sdl.init [`EVERYTHING];
     Sdlevent.enable_events Sdlevent.all_events_mask;
   end
- 
-(* attendre une touche ... *)
-let rec wait_key () =
-  let e = Sdlevent.wait_event () in
-    match e with
-    Sdlevent.KEYDOWN _ -> ()
-      | _ -> wait_key ()
- 
+
 (*
   show img dst
   affiche la surface img sur la surface de destination dst
@@ -69,28 +62,34 @@ let main () =
     (* Loading *)
     Printf.printf "Loading image\n%!";
     let src = Sdlloader.load_image Sys.argv.(1) in
-    Printf.printf "Image loaded\n%!";
+    Printf.printf "Image loaded\n%!";     
 
     let (w,h) = Function.get_dims src in 
-
-    (* Apply filter against noise (currently a relaxed median filter) *)
-    Printf.printf "Applying anti-noise filters\n%!"; 
-    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
-      if (!filter = "m") then
-	begin
-	  Filters.applyRelaxedFilterMedianGrey src filteredImage;
-	end
-      else if (!filter = "c") then
-	begin
-	  Filters.applyPasseHautFilter src filteredImage;
-	end
-      else
-	Function.copyImg src filteredImage;
-
     
     let display = Sdlvideo.set_video_mode w h [`DOUBLEBUF] in
     show src display;
-    wait_key ();    
+    Function.wait_key ();
+    
+    (* Apply filter against noise (currently a relaxed median filter) *)
+    Printf.printf "Applying anti-noise filters \n %!"; 
+    let filteredImage = Sdlvideo.create_RGB_surface_format src [] w h in
+      if (!filter = "m") then
+	begin
+	  Printf.printf "Median Filter \n %!";
+	  Filters.applyRelaxedFilterMedianGrey src filteredImage;
+	  Binarization.opening filteredImage filteredImage;
+	  show filteredImage display;
+	  Function.wait_key ();
+	end
+      else if (!filter = "c") then
+	begin
+	  Printf.printf "Passe Bande filter \n %!";
+	  Filters.applyPasseBandeFilter src filteredImage;
+	end
+      else
+	Printf.printf "No filter %!";
+	Function.copyImg src filteredImage;
+   
     Printf.printf "Anti-noise filters applied\n%!";
 
     (* Make a copy of the filtered image for the rotation *)
@@ -106,7 +105,7 @@ let main () =
     Printf.printf "Binarization done\n%!";
 
     show binarizedImage display;
-    wait_key ();
+    Function.wait_key ();
     (* Detect the angle using Hough transform *)
     Printf.printf "Angle detecting...\n%!";
     let points = Sdlvideo.create_RGB_surface_format binarizedImage [] w h in
@@ -119,32 +118,40 @@ let main () =
     Printf.printf "Rotating...\n%!";
     let rotatedImage = Sdlvideo.create_RGB_surface_format filteredImageCopy [] w h in
     Function.toWhite rotatedImage;
-    Rotate.rotateWeighted filteredImageCopy rotatedImage !angle;
+    Rotate.rotateWeighted filteredImageCopy rotatedImage !angle;    
     Printf.printf "Rotation done\n%!";
 
     show rotatedImage display;
-    wait_key ();
+    Function.wait_key ();
 
     (* Binarize the rotated image (again using Otsu's method) *)
-    Printf.printf "Binarization...\n%!";
     let pretreatedImage =
       Sdlvideo.create_RGB_surface_format rotatedImage [] w h in
     Binarization.binarizationOtsu rotatedImage pretreatedImage;
 
-    Printf.printf "Binarization done\n%!";
-
-    (* Create the display surface in doublebuffering with the image size *)
-
     show pretreatedImage display;
-    wait_key ();
+    Function.wait_key ();
+
+    (* Detect the chacacter from the rotated and filter image *)
     Printf.printf "Character detection...\n%!";
     Extract.charDetection pretreatedImage;
     show pretreatedImage display;
     saveImage pretreatedImage;
     Printf.printf "Character detection done\n%!";
+
     Printf.printf "Pretreatement done\n%!";
+
+    (* Create the display surface in doublebuffering with the image size *)
+
+    show pretreatedImage display;
+    Function.wait_key ();
+    Extract.charDetection pretreatedImage;
+    show pretreatedImage display;
+    saveImage pretreatedImage;
+
     (* on attend une touche *)
-    wait_key ();
+    Function.wait_key ();
+
     (* on quitte *)
     exit 0
   end
