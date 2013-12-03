@@ -55,6 +55,14 @@ let toWhite img =
       Sdlvideo.put_pixel_color img i j (255,255,255)
     done
   done
+
+let toRed img = 
+  let (w,h) = get_dims img in
+  for i = 0 to w - 1 do
+    for j = 0 to h - 1 do
+      Sdlvideo.put_pixel_color img i j (255,0,0)
+    done
+  done
   
 (* Copy img into dst *)
 let copyImg img dst =
@@ -68,3 +76,9 @@ let copyImg img dst =
 let float_of_color (color, _, _) = 
   float_of_int color 
 
+(* attendre une touche ... *)
+let rec wait_key () =
+  let e = Sdlevent.wait_event () in
+    match e with
+    Sdlevent.KEYDOWN _ -> ()
+      | _ -> wait_key ()
