@@ -80,7 +80,7 @@ let getLeftCorner img i j =
   done;
   (!x + 1, !y + 1)
 
-let findWhite img = 
+let charDetection img = 
   let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 and compteur = ref 0 in
   while !j < height do
     while !i < width do
@@ -105,8 +105,3 @@ let findWhite img =
     i := 0;
     j := !j + 1;
   done
-
-let charDetection img = 
-    let (width, height) = Function.get_dims img in
-    let (_,_) = (trace_lines img 0 (width-1) 0 (height-1), trace_lines_column img 0 (height-1) 0 (width - 1)) in
-    findWhite img
