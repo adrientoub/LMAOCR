@@ -1,3 +1,5 @@
+let scannedCorner = ref [] (* List which contains scanned pixels *)
+
 (* Tests if a line only has white pixels *)
 let test_empty_line img h w0 wmax =
   let rec f img h w  =
@@ -5,8 +7,8 @@ let test_empty_line img h w0 wmax =
       true
     else
       match Sdlvideo.get_pixel_color img w h with
-        | (x,_,_) when x >= 127 -> f img h (w+1) (* SI c'est du blanc ou du gris on relance *)
-        | _ -> false (* Sinon on est tombé sur une lettre, donc la ligne n'est pas vide *)
+        | (x,_,_) when x >= 127 -> f img h (w+1)
+        | _ -> false
   in f img h w0
 		
 (* Tests if a column only has white pixels *)
@@ -56,34 +58,46 @@ let trace_lines_column img h0 hmax w0 wmax =
   done;
   !result
 
-let getDimension img i j =
-  let (width, height) = Function.get_dims img and x = ref i and y = ref j in
-  while (!x < width && (Sdlvideo.get_pixel_color img !x j = (255,255,255) || Sdlvideo.get_pixel_color img !x j = (0,0,0))) do
+(* Return the width and height of the current white block *)
+let getDimension img i j = 
+  let (width, height) = Function.get_dims img  and x = ref i and y = ref j in
+  while (!x < width && (Sdlvideo.get_pixel_color img !x j <> (127,127,127))) do
     x := !x + 1;
   done;
-  while (!y < height && (Sdlvideo.get_pixel_color img i !y = (255,255,255) || Sdlvideo.get_pixel_color img i !y = (0,0,0))) do
+  while (!y < height && (Sdlvideo.get_pixel_color img i !y <> (127,127,127))) do
     y := !y + 1;
   done;
   (!x, !y)
 
+(* Return the topleft corner of the current white block *)
+let getLeftCorner img i j = 
+  let x = ref i and y = ref j in
+  while (!x > 0 && (Sdlvideo.get_pixel_color img !x j <> (127,127,127))) do
+    x := !x - 1;
+  done;
+  while (!y > 0 && (Sdlvideo.get_pixel_color img i !y <> (127,127,127))) do
+    y := !y - 1;
+  done;
+  (!x + 1, !y + 1)
+
 let findWhite img = 
-  let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 and compteur = ref 0 and nbitemax = 4 in
+  let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 and compteur = ref 0 in
   while !j < height do
     while !i < width do
       let (r,g,b) = Sdlvideo.get_pixel_color img !i !j in
       if (r = 255 && g = 255 && b = 255) then
 	begin
-	  (* On determine la largeur et la longueur du bloc de texte *)
-	  let result = ref true and (x, y) = getDimension img !i !j in
+	  (* Split the blocs caracters *)
+	  let (cornerI, cornerJ) = getLeftCorner img !i !j in
+	  let result = ref (not (List.exists (function (x,y) -> x = cornerI && y = cornerJ ) !scannedCorner)) in
+	 
 	  while !result do
-	    (* On separe les caractères dans ce bloc *)
-	    let testLines = (trace_lines img !i (x - 1) !j (y - 1)) and
-		testColumns = (trace_lines_column img !j (y - 1) !i (x - 1)) in
-	    (*Printf.printf "Position : %i %i w,h : %i %i\n" !i !j !x !y;*)
-	    i := x;
-	    j := y;
-	    result := (testLines || testColumns);
+	    let (w, h) = getDimension img cornerI cornerJ in
+	    let resultLines = trace_lines img cornerI (w - 1) cornerJ (h - 1) and resultColumns = trace_lines_column img cornerJ (h - 1) cornerI (w - 1) in
+	    result := (resultLines || resultColumns);
 	  done;
+	 
+	  scannedCorner := (cornerI,cornerJ)::!scannedCorner;
 	  compteur := !compteur + 1;
 	end;
       i := !i + 1;
@@ -94,6 +108,5 @@ let findWhite img =
 
 let charDetection img = 
     let (width, height) = Function.get_dims img in
-    trace_lines img 0 (width-1) 0 (height-1);
-    trace_lines_column img 0 (height-1) 0 (width - 1);
+    let (_,_) = (trace_lines img 0 (width-1) 0 (height-1), trace_lines_column img 0 (height-1) 0 (width - 1)) in
     findWhite img
