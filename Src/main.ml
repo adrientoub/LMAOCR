@@ -143,11 +143,6 @@ let main () =
 
     (* Create the display surface in doublebuffering with the image size *)
 
-    show pretreatedImage display;
-    Function.wait_key ();
-    Extract.charDetection pretreatedImage;
-    show pretreatedImage display;
-    saveImage pretreatedImage;
 
     (* on attend une touche *)
     Function.wait_key ();
