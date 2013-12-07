@@ -23,6 +23,7 @@ let showHelp () =
   Printf.printf "Pour lancer l'ocr utilisez les paramètres suivants : \n
 --help : afficher l'aide
 -help  : afficher l'aide
+./lmaocr : lance l'interface
 ./lmaocr [nom du fichier] : lancer l'ocr avec l'image en paramètre
 ./lmaocr [nom du fichier] [angle] : lance l'ocr avec l'angle défini en paramètre
 ./lmaocr [nom du fichier] [-o [sauvegarde]] : save the image \n";
@@ -40,10 +41,17 @@ let saveImage finalImage =
 
 let main () =
   begin
-    (* Get image file name *)
-    if (Array.length (Sys.argv) < 2) || ((compare Sys.argv.(1) "--help") = 0)
-      || ((compare Sys.argv.(1) "-help") = 0) then
-      showHelp ();
+  
+   (* Aide ou interface *)
+    if (Array.length (Sys.argv) < 2) then
+      if ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
+	showHelp ()
+      else
+	Printf.Printf "Soon"
+	(* Interface.main () *)
+	  
+    (* Mode console *)
+    else
 
     (* get the rotation's angle *)
     let angle = ref 0. in
