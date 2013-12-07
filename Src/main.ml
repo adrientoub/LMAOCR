@@ -47,7 +47,7 @@ let main () =
       if ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
 	showHelp ()
       else
-	Printf.Printf "Soon"
+	Printf.printf "Soon"
 	(* Interface.main () *)
 	  
     (* Mode console *)
