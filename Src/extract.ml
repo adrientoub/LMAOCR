@@ -94,18 +94,33 @@ let print img =
     Sdlvideo.save_BMP result ((string_of_int x)^".bmp");
   done
 
-let redimensionner () = 
-  let taille = 16 in
+let redimensionner () =
+  let taille = 16 in 
   while List.length !imgList > 0 do
     let image = List.hd !imgList in
     let (w,h) = (Array.length image, Array.length image.(0)) in 
-    let trueImg = Array.create_matrix taille taille (255,255,255) in
-    for i = 0 to taille - 1 do
+    let trueImg = Array.create_matrix 16 16 (255,255,255) in
+    let decalagex  = if h > w then (h-w) else 0 and decalagey = if w > h then (w-h) else 0 in
+    
+    (*for c = 0 to (max decalagex decalagey) do
+      begin
+      for i = 0 downto (max w h) - 1 do
+	for j = 0 downto (max w h) - 1 do
+	   trueImg.(i+decalagex).(j+decalagey) <- image.(i).(j);
+	done;
+      done;
+    for i = 0 to (max w h) - 1 do
+      if w > h then
+	trueImg.(0).(i) <- (255,255,255);
+      if h > w then
+	trueImg.(i).(0) <- (255,255,255);
+    done;
+      end;
+    done;*)
+    let rx = (float_of_int taille /. float_of_int w) and ry = (float_of_int taille /. float_of_int h) in
+    for i = 0 to taille -1 do
 	for j = 0 to taille - 1 do
-	  if (i >= w || j >= h) then
-	    trueImg.(i).(j) <- (255,255,255)
-	  else
-	    trueImg.(i).(j) <- image.(i).(j);
+	    trueImg.(i).(j) <- image.( int_of_float (float_of_int i /. rx) ).( int_of_float (float_of_int j /. ry) );
 	done;
     done;
 
