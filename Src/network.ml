@@ -65,11 +65,14 @@ let output network neuron =
 
 (* ne fonctionne que sur des images en niveau de gris et renvoie un flotant entre 0 et 1 *)
 let get_color image x y = 
-  let (c,_,_) = Sdlvideo.get_pixel_color image x y in
+  let (c,_,_) = image.(x).(y) in
   (float c) /. 255.
 
+let get_dims_mat image =
+  (Array.length image, Array.length image.(0))
+
 let watch network image = 
-  let (w,h) = Function.get_dims image in
+  let (w,h) = get_dims_mat image in
   for x = 0 to w - 1 do
     for y = 0 to h - 1 do
       network.input.(y * w + x) <- get_color image x  y
@@ -88,18 +91,17 @@ let learn network c rate =
 
 (* copie une image *)
 let copy image = 
-  let (w, h) = Function.get_dims image in
-  let nimage = Sdlvideo.create_RGB_surface_format image [] w h in
+  let (w, h) = get_dims_mat image in
+  let nimage = Array.create_matrix w h 0 in
   for x = 0 to w - 1 do
     for y = 0 to h - 1 do
-      let color = Sdlvideo.get_pixel_color image x y in
-      Sdlvideo.put_pixel_color image x y color
+      let color = image.(x).(y) in
+      nimage.(x).(y) <- color
     done
   done;
   nimage
 
 (* Apprend l'alphabet au network *)
-(*
 let learn_alphabet network image =
   let rate = 0.1 in
   let rec rl = function
@@ -110,17 +112,12 @@ let learn_alphabet network image =
       rl (i-1, t)
   in
   let cimg = copy image in
-  let bl, _ = Extr.extract_learning cimg in
-  let lc =
-    List.map
-      (fun c -> Image.extract img c.Box.c
-	(c.Box.w, c.Box.h) (12, 12)) bl
-  in
+  let lc = !Extract.listAlphabet in
   for i = 0 to 200 do
     rl (network.size, lc)
   done;
   save network "network.ocr"
-*)
+
 let read_char network = 
   let c = ref 'x' in
   let max = ref 0. in
@@ -135,3 +132,10 @@ let read_char network =
   done;
   !c
 
+let read_string network image = 
+  let rec rr b = function
+    | [] -> b
+    | h::t -> 
+      watch network c;
+      rr (b ^ (Char.escaped read_char network)) t in
+  rr "" !resultList
