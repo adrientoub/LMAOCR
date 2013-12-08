@@ -108,7 +108,6 @@ try
 	i = ref 0 and j = ref 0 and finalList = ref [] and medRayon = ref [] in
     begin
       Function.toWhite output;
-      Sdlvideo.save_BMP img "bin.bmp";
       (* Initialise le tableau de scan *)
       scanned := (Array.create_matrix w h false);
 (*  Detecte le premier pixel noir et le stock dans lastPixel *)
