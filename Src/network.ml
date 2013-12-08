@@ -102,7 +102,7 @@ let copy image =
   nimage
 
 (* Apprend l'alphabet au network *)
-let learn_alphabet network image =
+let learn_alphabet network =
   let rate = 0.1 in
   let rec rl = function
     | (0, _) | (_, []) -> ()
@@ -111,7 +111,6 @@ let learn_alphabet network image =
       learn network (network.alphabet.[network.size-i]) rate;
       rl (i-1, t)
   in
-  let cimg = copy image in
   let lc = !Extract.listAlphabet in
   for i = 0 to 200 do
     rl (network.size, lc)
