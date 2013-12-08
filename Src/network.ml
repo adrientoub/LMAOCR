@@ -111,7 +111,7 @@ let learn_alphabet network =
       learn network (network.alphabet.[network.size-i]) rate;
       rl (i-1, t)
   in
-  let lc = !Extract.listAlphabet in
+  let lc = !Extract.alphabetList in
   for i = 0 to 200 do
     rl (network.size, lc)
   done;
@@ -131,10 +131,10 @@ let read_char network =
   done;
   !c
 
-let read_string network image = 
+(*let read_string network image = 
   let rec rr b = function
     | [] -> b
     | h::t -> 
       watch network c;
       rr (b ^ (Char.escaped read_char network)) t in
-  rr "" !resultList
+  rr "" !resultList*)

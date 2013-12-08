@@ -1,6 +1,7 @@
 let scannedCorner = ref [] (* List which contains scanned pixels *)
 let imgList = ref []
 let resultList = ref []
+let alphabetList = ref []
 
 (* Tests if a line only has white pixels *)
 let test_empty_line img h w0 wmax =
@@ -83,8 +84,8 @@ let getLeftCorner img i j =
   (!x + 1, !y + 1)
 
 let print img = 
-  for x = 0 to (List.length !resultList) - 1 do
-    let buffer = List.nth !resultList x in let (w,h) = (Array.length buffer, Array.length buffer.(0)) in
+  for x = 0 to (List.length !alphabetList) - 1 do
+    let buffer = List.nth !alphabetList x in let (w,h) = (Array.length buffer, Array.length buffer.(0)) in
     let result = Sdlvideo.create_RGB_surface_format img [] w h in
     for i = 0 to w - 1 do
       for j = 0 to h - 1 do
@@ -94,7 +95,7 @@ let print img =
     Sdlvideo.save_BMP result ((string_of_int x)^".bmp");
   done
 
-let redimensionner () =
+let redimensionner img =
   let taille = 16 in 
   while List.length !imgList > 0 do
     let image = ref (List.hd !imgList) in
@@ -119,8 +120,13 @@ let redimensionner () =
     done;
 
     imgList := List.tl !imgList;
-    resultList := !trueImg::!resultList;
-  done
+    if((Function.get_dims img) = (1100,16)) then
+      alphabetList := !trueImg::!alphabetList
+    else
+      resultList := !trueImg::!resultList;
+  done;
+   if((Function.get_dims img) = (1100,16)) then
+     alphabetList := List.tl !alphabetList
 
 let charDetection img = 
   let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 in
@@ -149,7 +155,33 @@ let charDetection img =
   Printf.printf "Recupération des caractères...\n%!";
   scannedCorner := [];
   let compteur = ref 0 and maxite = 40 in
+  let alphabet = if ((Function.get_dims img) = (1100,16)) then true else false in
+if alphabet then
+  for i = 0 to width - 1 do
   for j = 0 to height - 1 do
+       if ( (Sdlvideo.get_pixel_color img i j) <> (127,127,127)) then
+	 begin
+	  
+	   let (cornerI, cornerJ) = getLeftCorner img i j in
+	   if (not (List.exists (function (x,y) -> x = cornerI && y = cornerJ ) !scannedCorner)) then	     
+	     let (w, h) = getDimension img cornerI cornerJ in
+	     let buffer = Array.create_matrix (w - i + 1) (h - j + 1) (255,255,255) in 
+	     if !compteur < maxite then
+	       begin
+		 for i2 = i to w - 1 do
+		   for j2 = j to h - 1 do
+		     buffer.(i2 - i).(j2 - j) <- (Sdlvideo.get_pixel_color img i2 j2);
+		   done;
+		 done;
+		 (*Sdlvideo.save_BMP imagedeouf ((string_of_int !compteur)^".bmp") ;*)
+		 imgList := buffer::!imgList;
+	       end;
+	     scannedCorner := (cornerI, cornerJ)::!scannedCorner;
+	 end;
+    done;
+  done
+else
+    for j = 0 to height - 1 do
     for i = 0 to width - 1 do
        if ( (Sdlvideo.get_pixel_color img i j) <> (127,127,127)) then
 	 begin
@@ -167,12 +199,12 @@ let charDetection img =
 		 done;
 		 (*Sdlvideo.save_BMP imagedeouf ((string_of_int !compteur)^".bmp") ;*)
 		 imgList := buffer::!imgList;
-		 compteur := !compteur + 1;
 	       end;
 	     scannedCorner := (cornerI, cornerJ)::!scannedCorner;
 	 end;
     done;
-  done;
-  redimensionner ();
+    done;
+  redimensionner img;
   Printf.printf "resultList contient %i images à traiter\n" (List.length !resultList);
+  Printf.printf "alphabetList contient %i images à traiter\n" (List.length !alphabetList);
   print img
