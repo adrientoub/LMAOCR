@@ -97,35 +97,29 @@ let print img =
 let redimensionner () =
   let taille = 16 in 
   while List.length !imgList > 0 do
-    let image = List.hd !imgList in
-    let (w,h) = (Array.length image, Array.length image.(0)) in 
-    let trueImg = Array.create_matrix 16 16 (255,255,255) in
+    let image = ref (List.hd !imgList) in
+    let (w,h) = (Array.length !image, Array.length !image.(0)) in 
+    let trueImg = ref (Array.create_matrix (max w h) (max w h) (255,255,255)) in
     let decalagex  = if h > w then (h-w) else 0 and decalagey = if w > h then (w-h) else 0 in
-    
-    (*for c = 0 to (max decalagex decalagey) do
-      begin
-      for i = 0 downto (max w h) - 1 do
-	for j = 0 downto (max w h) - 1 do
-	   trueImg.(i+decalagex).(j+decalagey) <- image.(i).(j);
+ 
+    for i = 0 to w -1 do
+	for j = 0 to h -1 do
+	  !trueImg.(i+decalagex / 2).(j+decalagey / 2) <- !image.(i).(j);
 	done;
-      done;
-    for i = 0 to (max w h) - 1 do
-      if w > h then
-	trueImg.(0).(i) <- (255,255,255);
-      if h > w then
-	trueImg.(i).(0) <- (255,255,255);
     done;
-      end;
-    done;*)
-    let rx = (float_of_int taille /. float_of_int w) and ry = (float_of_int taille /. float_of_int h) in
+
+    image := !trueImg;
+    trueImg := (Array.create_matrix taille taille (255,255,255));
+
+    let rx = (float_of_int taille /. float_of_int (max w h)) and ry = (float_of_int taille /. float_of_int (max w h)) in
     for i = 0 to taille -1 do
 	for j = 0 to taille - 1 do
-	    trueImg.(i).(j) <- image.( int_of_float (float_of_int i /. rx) ).( int_of_float (float_of_int j /. ry) );
+	    !trueImg.(i).(j) <- !image.( int_of_float (float_of_int i /. rx) ).( int_of_float (float_of_int j /. ry) );
 	done;
     done;
 
     imgList := List.tl !imgList;
-    resultList := trueImg::!resultList;
+    resultList := !trueImg::!resultList;
   done
 
 let charDetection img = 
@@ -154,7 +148,7 @@ let charDetection img =
   done;
   Printf.printf "Recupération des caractères...\n%!";
   scannedCorner := [];
-  let compteur = ref 0 and maxite = 20 in
+  let compteur = ref 0 and maxite = 40 in
   for j = 0 to height - 1 do
     for i = 0 to width - 1 do
        if ( (Sdlvideo.get_pixel_color img i j) <> (127,127,127)) then
