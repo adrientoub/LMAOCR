@@ -160,8 +160,11 @@ let main () =
     Extract.charDetection binarizedAlphabet;
     Network.learn_alphabet network;
     let texte = Network.read_string network in
-    Printf.printf "Il y a %i images dans l'alphabet" (List.length !Extract.alphabetList);
-    Printf.printf "%s" texte;
+    Printf.printf "%s\n" texte;
+    let fichierTexte = open_out "texte.txt" in
+    output_string fichierTexte texte;
+    close_out fichierTexte;
+    Printf.printf "Enregistré dans texte.txt\n";
 
     (* on quitte *)
     exit 0

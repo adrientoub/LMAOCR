@@ -118,7 +118,7 @@ let learn_alphabet network =
       rl (i-1, t)
   in
   let lc = !Extract.alphabetList in
-  for i = 0 to 200 do
+  for i = 0 to 500 do
     rl (network.size, lc)
   done;
   save network "network.ocr"
