@@ -84,8 +84,8 @@ let getLeftCorner img i j =
   (!x + 1, !y + 1)
 
 let print img = 
-  for x = 0 to (List.length !alphabetList) - 1 do
-    let buffer = List.nth !alphabetList x in let (w,h) = (Array.length buffer, Array.length buffer.(0)) in
+  for x = 0 to (List.length !resultList) - 1 do
+    let buffer = List.nth !resultList x in let (w,h) = (Array.length buffer, Array.length buffer.(0)) in
     let result = Sdlvideo.create_RGB_surface_format img [] w h in
     for i = 0 to w - 1 do
       for j = 0 to h - 1 do
@@ -128,7 +128,10 @@ let redimensionner img =
    if((Function.get_dims img) = (1100,16)) then
      alphabetList := List.tl !alphabetList
 
-let charDetection img = 
+let charDetection img =
+scannedCorner := []; (* List which contains scanned pixels *)
+imgList := [];
+
   let (width, height) = Function.get_dims img and i = ref 0 and j = ref 0 in
   while !j < height do
     while !i < width do
@@ -154,7 +157,7 @@ let charDetection img =
   done;
   Printf.printf "Recupération des caractères...\n%!";
   scannedCorner := [];
-  let compteur = ref 0 and maxite = 40 in
+  let compteur = ref 0 and maxite = 200 in
   let alphabet = if ((Function.get_dims img) = (1100,16)) then true else false in
 if alphabet then
   for i = 0 to width - 1 do
@@ -175,6 +178,7 @@ if alphabet then
 		 done;
 		 (*Sdlvideo.save_BMP imagedeouf ((string_of_int !compteur)^".bmp") ;*)
 		 imgList := buffer::!imgList;
+		 compteur := !compteur + 1;
 	       end;
 	     scannedCorner := (cornerI, cornerJ)::!scannedCorner;
 	 end;
@@ -199,11 +203,13 @@ else
 		 done;
 		 (*Sdlvideo.save_BMP imagedeouf ((string_of_int !compteur)^".bmp") ;*)
 		 imgList := buffer::!imgList;
+		 compteur := !compteur + 1;
 	       end;
 	     scannedCorner := (cornerI, cornerJ)::!scannedCorner;
 	 end;
     done;
     done;
+  Sdlvideo.save_BMP img "gris.bmp";
   redimensionner img;
   Printf.printf "resultList contient %i images à traiter\n" (List.length !resultList);
   Printf.printf "alphabetList contient %i images à traiter\n" (List.length !alphabetList);
