@@ -24,6 +24,8 @@ Olivier Do"]
             ~callback:(fun _ -> dialog#show ()));
     ignore(dialog#run ())
       
+let network = Network.create_default () 
+
 (* ---------------- Lance l'interface --------------- *)
   
 let start_interface () =
@@ -119,40 +121,6 @@ let start_interface () =
         ~typ:"bmp"
         pixbufvide;
     in
-
-      (*  
-	  let imagecompression () = 
-	  sdl_init ();
-	  let pixbuf = GdkPixbuf.from_file(!img_path) in
-	  let w = GdkPixbuf.get_width pixbuf in
-	  let h = GdkPixbuf.get_height pixbuf in
-	  let maximus = max w h in
-	  let diviseur = ref 1 in
-	  if (maximus>2000) then
-	  if (maximus<4000) then
-          diviseur := 2;        
-	  if (maximus>4000) && (maximus<6000) then
-          diviseur := 3;
-	  if (maximus>6000) then
-          diviseur := 4;
-	  
-	  let pixbufvide = GdkPixbuf.create
-          ~width:(w/(!diviseur))
-          ~height:(h/(!diviseur))
-          () in      
-	  GdkPixbuf.scale 
-	  ~dest: pixbufvide
-	  ~width:(w/(!diviseur))
-	  ~height:(h/(!diviseur))
-	  pixbuf;  
-	  
-	  GdkPixbuf.save 
-          ~filename:("img/image_cp.bmp") 
-          ~typ:"bmp"
-          pixbufvide;
-	  in     
-	*)
-
 
       let binarize () =
 	begin
@@ -296,7 +264,8 @@ let start_interface () =
 	imageapercu ();
 	picture_area#set_file "img/image_apercu.bmp";
 	copy_ref "img/image_tmp.bmp" in
-	 
+
+		 
       
     (* -------------------  PRETREATMENT  ---------------------- *)
       
@@ -424,6 +393,28 @@ let start_interface () =
       textbox#misc#modify_font_by_name "Monospace 10";
       let s = ""
       in textbox#buffer#set_text(s);
+
+
+      let recognize_text () = 
+	let alphabet = Sdlloader.load_image "Alphabet.jpg" in
+	let (w,h) = Function.get_dims alphabet in
+	let binarizedAlphabet =
+	  Sdlvideo.create_RGB_surface_format alphabet [] w h in
+	Binarization.binarizationOtsu alphabet binarizedAlphabet;
+	Extract.charDetection binarizedAlphabet;
+	Network.learn_alphabet network;
+	let texte = Network.read_string network in
+	let fichierTexte = open_out "texte.txt" in
+	output_string fichierTexte texte;
+	close_out fichierTexte;
+	textbox#buffer#set_text(texte);
+      in
+
+      let network_button = GButton.button 
+	~label:"Recognize"
+	~packing:boxtreat#add () in 
+      ignore (network_button#connect#clicked ~callback:(recognize_text););
+      
       
       (* -------------------- SAVE BUTTON ---------------------- *)
       
@@ -454,13 +445,15 @@ let start_interface () =
 	~height:25
 	~packing:(menu_box#add) () in
       open_b#set_filter (checkImg ());
-      Printf.printf "h";
       ignore(open_b#connect#selection_changed (touch_picture open_b););
       
       let reset () = 
 	picture_area#set_file "init.png";
 	copy_ref "init.png";
 	step1_clicked:= false;
+	Extract.resultList := [];
+	textbox#buffer#set_text("");
+	
 	img_path := "" in
       
       let reset_button = GButton.button 
@@ -477,17 +470,16 @@ let start_interface () =
 	~callback:(about));
       ignore(GMisc.image ~stock:`ABOUT ~packing:about_button#set_image ());     
       
-      let close_button = GButton.button 
+   (*   let close_button = GButton.button 
 	~label:"Close" 
 	~stock: `CLOSE
 	~packing:menu_box#add () in ignore (close_button#connect#clicked
 					      ~callback:(GMain.quit));
-      ignore(GMisc.image ~stock:`CLOSE ~packing:close_button#set_image ());
+      ignore(GMisc.image ~stock:`CLOSE ~packing:close_button#set_image ()); *)
       
       window#show();
       
       GMain.Main.main ()
 	
   end
-    
-let _ = Printexc.print start_interface ();
+

@@ -141,17 +141,15 @@ let applyLinearFilter img dst tabCoeff =
   let dstMatrix = T_matrix.multMatrix imgMatrix tabCoeff
   in T_matrix.matrixToImg dstMatrix dst
 
-
 let applyPasseHautFilter img dst =
   begin
-    let  passeHaut =  [| [|0.;0.;0.|]; [|0.;0.;0.|]; [|0.;0.;0.|] |]
-  (* [| [|0.;-1.;0.|]; [|-1.;5.;-1.|]; [|0.;-1.;0.|] |]*)  in
+    let  passeHaut = [| [|0.;-1.;0.|]; [|-1.;5.;-1.|]; [|0.;-1.;0.|] |] in
     applyLinearFilter img dst passeHaut;
   end
 
 let applyPasseBasFilter img dst =
   begin
-    let  passeBas = [| [|1.;2.;1.|]; [|2.;8.;2.|]; [|1.;2.;1.|] |]  in
+    let  passeBas = [| [|1.;1.;1.|]; [|1.;4.;1.|]; [|1.;1.;1.|] |]  in
     normalize passeBas;
     applyLinearFilter img dst passeBas;
   end
@@ -159,5 +157,5 @@ let applyPasseBasFilter img dst =
 let applyPasseBandeFilter img dst =
   begin 
     applyPasseHautFilter img dst;
-  (*  applyPasseBasFilter dst dst; *)
+    applyPasseBasFilter dst dst; 
   end

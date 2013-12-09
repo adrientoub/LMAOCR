@@ -85,7 +85,7 @@ let main () =
 	begin
 	  Printf.printf "Median Filter \n %!";
 	  Filters.applyRelaxedFilterMedianGrey src filteredImage;
-	  Binarization.opening filteredImage filteredImage;
+	  (* Binarization.opening filteredImage filteredImage; *)
 	  show filteredImage display;
 	  Function.wait_key ();
 	end
@@ -148,6 +148,7 @@ let main () =
     Printf.printf "Character detection done\n%!";
     
     Printf.printf "Pretreatement done\n%!";
+
     (* on attend une touche *)
     Function.wait_key ();
     let network = Network.create_default () in
@@ -161,10 +162,10 @@ let main () =
     Network.learn_alphabet network;
     let texte = Network.read_string network in
     Printf.printf "%s\n" texte;
-    let fichierTexte = open_out "texte.txt" in
+    let fichierTexte = open_out "Result_by_LMAOCR.txt" in
     output_string fichierTexte texte;
     close_out fichierTexte;
-    Printf.printf "Enregistré dans texte.txt\n";
+    Printf.printf "Enregistré dans Result_by_LMAOCR.txt\n";
 
     (* on quitte *)
     exit 0

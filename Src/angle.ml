@@ -207,7 +207,6 @@ try
       done;
       finalList := (List.sort compareTo !finalList);
       let angle = getMedian !finalList in
-      Printf.printf "Nombre de lignes : %i\n" (List.length !finalList);
       angle
     end;
   end;

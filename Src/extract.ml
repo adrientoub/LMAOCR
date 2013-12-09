@@ -93,7 +93,7 @@ let print img =
 	Sdlvideo.put_pixel_color result i j buffer.(i).(j);
       done;
     done;
-    Sdlvideo.save_BMP result ((string_of_int x)^".bmp");
+    Sdlvideo.save_BMP result ("img/"^(string_of_int x)^".bmp");
   done
 
 let redimensionner img =
@@ -156,7 +156,6 @@ imgList := [];
     i := 0;
     j := !j + 1;
   done;
-  Printf.printf "Recupération des caractères...\n%!";
   scannedCorner := [];
   let compteur = ref 0 and maxite = 200 in
   let alphabet = ((Function.get_dims img) = (1100,16)) in
@@ -210,8 +209,6 @@ else
 	 end;
     done;
     done;
-  Sdlvideo.save_BMP img "gris.bmp";
+  Sdlvideo.save_BMP img "img/gris.bmp";
   redimensionner img;
-  Printf.printf "resultList contient %i images à traiter\n" (List.length !resultList);
-  Printf.printf "alphabetList contient %i images à traiter\n" (List.length !alphabetList);
   print img
