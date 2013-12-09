@@ -40,14 +40,14 @@ let saveImage finalImage =
 let main () =
   begin
     
-    (* Aide ou interface *)(*
+    (* Interface *)
     if (Array.length (Sys.argv) < 2) then
 	begin
           Interface.start_interface ();
 	  exit 0
 	end
     (* Mode console *)
-    else*)
+    else
       if ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
 	begin
           showHelp ();
