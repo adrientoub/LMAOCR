@@ -84,7 +84,8 @@ let getLeftCorner img i j =
   (!x + 1, !y + 1)
 
 let print img = 
-  for x = 0 to (List.length !resultList) - 1 do
+  let ite = if List.length !resultList < 50 then List.length !resultList - 1 else 49 in
+  for x = 0 to ite do
     let buffer = List.nth !resultList x in let (w,h) = (Array.length buffer, Array.length buffer.(0)) in
     let result = Sdlvideo.create_RGB_surface_format img [] w h in
     for i = 0 to w - 1 do
