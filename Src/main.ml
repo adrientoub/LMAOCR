@@ -25,13 +25,12 @@ let showHelp () =
 -help  : afficher l'aide
 ./lmaocr : lance l'interface
 ./lmaocr [nom du fichier] : lancer l'ocr avec l'image en paramètre
-./lmaocr [nom du fichier] [angle] : lance l'ocr avec l'angle défini en paramètre
+./lmaocr [nom du fichier] [c|m] : lance l'ocr avec le filtre défini
 ./lmaocr [nom du fichier] [-o [sauvegarde]] : save the image \n"
-
 
 let saveImage finalImage =
   let length = Array.length (Sys.argv) in
-  for i = 3 to length-1 do
+  for i = 2 to length-1 do
     if (compare Sys.argv.(i) "-o") = 0 then
       if (length >= i+1) then
 	  Sdlvideo.save_BMP finalImage Sys.argv.(i+1);
@@ -41,22 +40,19 @@ let saveImage finalImage =
 let main () =
   begin
     
-    (* Aide ou interface *)
+    (* Aide ou interface *)(*
     if (Array.length (Sys.argv) < 2) then
-      if ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
-	begin
-          showHelp ();
-	  exit 0
-	end
-	  
-      else
 	begin
           Interface.start_interface ();
 	  exit 0
 	end
-	  
     (* Mode console *)
-    else
+    else*)
+      if ((compare Sys.argv.(1) "--help") = 0) || ((compare Sys.argv.(1) "-help") = 0) then
+	begin
+          showHelp ();
+	  exit 0
+	end;
       (* get the rotation's angle *)
       let angle = ref 0. in
       
@@ -152,13 +148,21 @@ let main () =
     Printf.printf "Character detection done\n%!";
     
     Printf.printf "Pretreatement done\n%!";
-    
-    (* Create the display surface in doublebuffering with the image size *)
-    
-    
     (* on attend une touche *)
     Function.wait_key ();
-    
+    let network = Network.create_default () in
+
+    let alphabet = Sdlloader.load_image "Alphabet.jpg" in
+    let (w,h) = Function.get_dims alphabet in
+    let binarizedAlphabet =
+      Sdlvideo.create_RGB_surface_format alphabet [] w h in
+    Binarization.binarizationOtsu alphabet binarizedAlphabet;
+    Extract.charDetection binarizedAlphabet;
+    Network.learn_alphabet network;
+    let texte = Network.read_string network in
+    Printf.printf "Il y a %i images" (List.length !Extract.alphabetList);
+    Printf.printf "%s" texte;
+
     (* on quitte *)
     exit 0
   end
