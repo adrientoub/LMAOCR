@@ -1,0 +1,19 @@
+Ce programme est un OCR developpe par l'equipe HipsterEgg dans le cadre d'un projet de deuxieme annee a l'EPITA.
+
+Manuel d'installation
+
+- Assurez-vous d'avoir installe les bibliotheques Sdlvideo et Lablgtk. Vous pouvez trouver Sdlvideo a l'adresse suivante : http://www.libsdl.org/download-1.2.php et Lablgtk : https://forge.ocamlcore.org/frs/?group_id=220.
+
+- Ouvrez un terminal dans le dossier LMAOCR/Src.
+- Utilisez la commande "make"
+
+Manuel d'utilisation
+
+- Pour lancer LMAOCR apres installation utilisez une des commandes suivantes, selon vos besoins :
+
+      ./lmaocr : lance LMAOCR en mode interface. 
+      ./lmaocr [nom_image] : lancer LMAOCR avec en parametre le nom de l'image a traiter et un filtrage par defaut.
+      ./lmaocr [nom_image] [c|m] : lance LMAOCR avec le filtre defini par le deuxieme argument. 'm' correspond a un filtrage median relache et 'c' un filtrage lineaire par un couple de filtre passe-haut/passe-bas.
+      ./lmaocr [nom_image] [-o [sauvegarde]] : sauvegarde l'image pretraitee.
+
+- Pour de plus amples informations consulter notre aide en ligne a l'adresse suivante : http://www.lmaocr.hostoi.com/
