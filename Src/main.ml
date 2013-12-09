@@ -160,7 +160,7 @@ let main () =
     Extract.charDetection binarizedAlphabet;
     Network.learn_alphabet network;
     let texte = Network.read_string network in
-    Printf.printf "Il y a %i images" (List.length !Extract.alphabetList);
+    Printf.printf "Il y a %i images dans l'alphabet" (List.length !Extract.alphabetList);
     Printf.printf "%s" texte;
 
     (* on quitte *)
