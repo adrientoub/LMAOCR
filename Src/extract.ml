@@ -158,7 +158,7 @@ imgList := [];
   Printf.printf "Recupération des caractères...\n%!";
   scannedCorner := [];
   let compteur = ref 0 and maxite = 200 in
-  let alphabet = if ((Function.get_dims img) = (1100,16)) then true else false in
+  let alphabet = ((Function.get_dims img) = (1100,16)) in
 if alphabet then
   for i = 0 to width - 1 do
   for j = 0 to height - 1 do
@@ -178,7 +178,7 @@ if alphabet then
 		 done;
 		 (*Sdlvideo.save_BMP imagedeouf ((string_of_int !compteur)^".bmp") ;*)
 		 imgList := buffer::!imgList;
-		 compteur := !compteur + 1;
+		 (*compteur := !compteur + 1;*)
 	       end;
 	     scannedCorner := (cornerI, cornerJ)::!scannedCorner;
 	 end;
@@ -203,7 +203,7 @@ else
 		 done;
 		 (*Sdlvideo.save_BMP imagedeouf ((string_of_int !compteur)^".bmp") ;*)
 		 imgList := buffer::!imgList;
-		 compteur := !compteur + 1;
+		 (*compteur := !compteur + 1;*)
 	       end;
 	     scannedCorner := (cornerI, cornerJ)::!scannedCorner;
 	 end;
